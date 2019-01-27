@@ -1,9 +1,9 @@
 # Makefile for Linux
 PREFIX=/usr/local
 CC=g++
-CFLAGS=-I.
-LIBNAME=libdoggo.a
-INCLUDE=doggo.h
+CFLAGS=-I. -Wall
+LIBNAME=libgrape2d.a
+INCLUDE=grape2d.h
 
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, build/%.o, $(SRC))
@@ -33,7 +33,7 @@ install:
 	@mkdir -p $(PREFIX)/lib/
 	@cp include/$(INCLUDE)  $(PREFIX)/include/
 	@cp build/$(LIBNAME) $(PREFIX)/lib/
-	@echo "> Doggo has been installed!"
+	@echo "> Grape2D has been installed!"
 
 uninstall:
 	@rm -f $(PREFIX)/include/$(INCLUDE)
