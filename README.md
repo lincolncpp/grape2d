@@ -5,7 +5,7 @@
 You can install, uninstall and build from source code directly from the Makefile.
 
 ### Prerequisites
-Before you use, you will need to install the following librarys
+Before you use, you will need to install the following libraries
 - SDL2
 - SDL2_ttf
 - SDL2_image
