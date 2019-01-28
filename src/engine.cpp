@@ -43,7 +43,7 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
                     }
                     else{
                         // Initialize renderer color
-                        SDL_SetRenderDrawColor(_renderer, 0x00, 0x00, 0x00, 0xFF);
+                        SDL_SetRenderDrawColor(_renderer, 0xFF, 0x00, 0x00, 0xFF);
                     }
                 }
             }
@@ -60,6 +60,7 @@ G2D_Engine::~G2D_Engine() {
 
     IMG_Quit();
     SDL_Quit();
+    TTF_Quit();
 }
 
 bool G2D_Engine::hasError() {

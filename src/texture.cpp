@@ -27,13 +27,56 @@ bool G2D_Texture::loadFromFile(const char *path) {
     else{
         // Getting texture dimensions
         SDL_QueryTexture(_texture, nullptr, nullptr, &_width, &_height);
-        return true;
     }
+
+    return true;
+}
+
+bool G2D_Texture::loadFromFont(G2D_Font *font, const char *text, G2D_Color color) {
+    free();
+
+    SDL_Color sdl_color = {color.r, color.g, color.b};
+    if (color.a > -1){
+        sdl_color.a = color.a;
+    }
+
+    SDL_Surface *textSurface = TTF_RenderText_Blended(font->_font, text, sdl_color);
+    if (textSurface == nullptr){
+        _engine->setError("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+
+        return false;
+    }
+    else{
+        _texture = SDL_CreateTextureFromSurface(_engine->_renderer, textSurface);
+
+        if (_texture == nullptr){
+            _engine->setError("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
+
+            return false;
+        }
+        else{
+            _width = textSurface->w;
+            _height = textSurface->h;
+        }
+
+        SDL_FreeSurface(textSurface);
+    }
+
+    return true;
 }
 
 void G2D_Texture::free() {
     if (_texture != nullptr){
         SDL_DestroyTexture(_texture);
+        _texture = nullptr;
+    }
+}
+
+void G2D_Texture::setColor(G2D_Color color) {
+    SDL_SetTextureColorMod(_texture, color.r, color.g, color.b);
+
+    if (color.a > -1){
+        SDL_SetTextureAlphaMod(_texture, color.a);
     }
 }
 
