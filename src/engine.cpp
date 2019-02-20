@@ -43,7 +43,7 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
                     }
                     else{
                         // Initialize renderer color
-                        SDL_SetRenderDrawColor(_renderer, 0xFF, 0x00, 0x00, 0xFF);
+                        SDL_SetRenderDrawColor(_renderer, 0x00, 0x00, 0x00, 0xFF);
                     }
                 }
             }
@@ -95,7 +95,11 @@ int G2D_Engine::getWindowHeight() {
     return _window_height;
 }
 
-void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(), void (*render)()) {
+int G2D_Engine::getFPS() {
+    return real_fps;
+}
+
+void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(int), void (*render)()) {
     if (_has_error) return;
     if (render == nullptr) return;
 
@@ -103,7 +107,7 @@ void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(), void (*render)(
     SDL_Event e;
 
     Uint32 tick = SDL_GetTicks();
-    int frames = 0;
+    int frame = 0;
 
     // Main loop
     while (!quit) {
@@ -121,7 +125,7 @@ void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(), void (*render)(
 
         // Logic game loop
         if (loop != nullptr){
-            loop();
+            loop(frame);
         }
 
         // Render
@@ -130,11 +134,13 @@ void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(), void (*render)(
         SDL_RenderPresent(_renderer);
 
         // FPS count
-        frames++;
+        frame++;
         Uint32 current_tick = SDL_GetTicks();
         if (current_tick > tick+1000){
             tick = current_tick;
-            frames = 0;
+            real_fps = frame;
+
+            frame = 0;
         }
     }
 }

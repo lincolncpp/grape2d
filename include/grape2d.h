@@ -31,6 +31,9 @@ private:
     int _window_width;
     int _window_height;
 
+    // FPS
+    int real_fps = 0;
+
     // Error
     bool _debug = false;
     std::string _error = "";
@@ -48,7 +51,9 @@ public:
     int getWindowWidth();
     int getWindowHeight();
 
-    void start(void (*event)(SDL_Event), void (*loop)(), void (*render)());
+    int getFPS();
+
+    void start(void (*event)(SDL_Event), void (*loop)(int), void (*render)());
 };
 
 
@@ -107,6 +112,8 @@ private:
 
     std::string _text;
     G2D_Color _color;
+
+    void reloadTexture();
 
 public:
     G2D_Text(G2D_Engine *engine, G2D_Font *font, const char *text, ...);

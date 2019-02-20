@@ -20,7 +20,8 @@ G2D_Text::G2D_Text(G2D_Engine *engine, G2D_Font *font, const char *text, ...) {
     _color = {0, 0, 0, 255};
 
     _texture = new G2D_Texture(_engine);
-    _texture->loadFromFont(_font, _text.c_str(), _color);
+
+    reloadTexture();
 }
 
 G2D_Text::~G2D_Text() {
@@ -30,7 +31,7 @@ G2D_Text::~G2D_Text() {
 void G2D_Text::setColor(G2D_Color color) {
     _color = color;
 
-    _texture->setColor(_color);
+    reloadTexture();
 }
 
 void G2D_Text::setColor(Uint8 red, Uint8 green, Uint8 blue) {
@@ -38,7 +39,7 @@ void G2D_Text::setColor(Uint8 red, Uint8 green, Uint8 blue) {
     _color.g = green;
     _color.b = blue;
 
-    _texture->setColor(_color);
+    reloadTexture();
 }
 
 void G2D_Text::setAlpha(Uint8 alpha) {
@@ -56,17 +57,19 @@ void G2D_Text::setText(const char *text, ...) {
 
     _text = msg;
 
-    _texture->loadFromFont(_font, _text.c_str(), _color);
-    _texture->setAlpha(_color.a);
+    reloadTexture();
 }
 
 void G2D_Text::setFont(G2D_Font *font) {
     _font = font;
 
-    _texture->loadFromFont(_font, _text.c_str(), _color);
-    _texture->setAlpha(_color.a);
+    reloadTexture();
 }
 
 void G2D_Text::render(int x, int y) {
     _texture->render(x, y);
+}
+
+void G2D_Text::reloadTexture() {
+    _texture->loadFromFont(_font, _text.c_str(), _color);
 }
