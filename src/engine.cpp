@@ -96,7 +96,15 @@ int G2D_Engine::getWindowHeight() {
 }
 
 int G2D_Engine::getFPS() {
-    return real_fps;
+    return _real_fps;
+}
+
+void G2D_Engine::setDrawScale(double scale) {
+    _draw_scale = scale;
+}
+
+double G2D_Engine::getDrawScale() {
+    return _draw_scale;
 }
 
 void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(int), void (*render)()) {
@@ -138,7 +146,7 @@ void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(int), void (*rende
         Uint32 current_tick = SDL_GetTicks();
         if (current_tick > tick+1000){
             tick = current_tick;
-            real_fps = frame;
+            _real_fps = frame;
 
             frame = 0;
         }

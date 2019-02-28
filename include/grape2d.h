@@ -16,9 +16,27 @@ struct G2D_Color{
     Uint8 r = 0;
     Uint8 g = 0;
     Uint8 b = 0;
-    Uint8 a = -1;
+    Uint8 a = 255;
 };
 
+struct G2D_Rect{
+    int x;
+    int y;
+    int w;
+    int h;
+};
+
+struct G2D_Point{
+    int x;
+    int y;
+};
+
+enum G2D_BlendMode{
+    G2D_BLENDMODE_NONE,
+    G2D_BLENDMODE_BLEND,
+    G2D_BLENDMODE_ADD,
+    G2D_BLENDMODE_MOD
+};
 
 class G2D_Engine{
     friend class G2D_Texture;
@@ -32,7 +50,10 @@ private:
     int _window_height;
 
     // FPS
-    int real_fps = 0;
+    int _real_fps = 0;
+
+    // Graphic control
+    double _draw_scale = 1;
 
     // Error
     bool _debug = false;
@@ -53,6 +74,10 @@ public:
 
     int getFPS();
 
+    void setDrawScale(double scale);
+    double getDrawScale();
+
+
     void start(void (*event)(SDL_Event), void (*loop)(int), void (*render)());
 };
 
@@ -64,7 +89,9 @@ private:
     G2D_Engine *_engine = nullptr;
     SDL_Texture *_texture = nullptr;
 
+    int _src_width;
     int _width;
+    int _src_height;
     int _height;
 
     bool loadFromFont(G2D_Font *font, const char *text, G2D_Color color);
@@ -78,12 +105,15 @@ public:
 
     void setColor(G2D_Color color);
     void setColor(Uint8 red, Uint8 green, Uint8 blue);
-    void setBlendMode(SDL_BlendMode blendMode);
+    void setBlendMode(G2D_BlendMode blendMode);
     void setAlpha(Uint8 alpha);
 
-    void render(int x, int y, SDL_Rect *clip = nullptr);
+    void render(int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
 
+    void setSize(int width, int height);
+    int getSrcWidth();
     int getWidth();
+    int getSrcHeight();
     int getHeight();
 };
 
