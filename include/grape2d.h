@@ -4,6 +4,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
+#include "SDL2/SDL_mixer.h"
 
 #include <string>
 
@@ -11,7 +12,10 @@ class G2D_Engine;
 class G2D_Texture;
 class G2D_Font;
 class G2D_Text;
+class G2D_Music;
 
+
+// G2D Color struct
 struct G2D_Color{
     Uint8 r = 0;
     Uint8 g = 0;
@@ -19,6 +23,7 @@ struct G2D_Color{
     Uint8 a = 255;
 };
 
+// G2D Rect struct
 struct G2D_Rect{
     int x;
     int y;
@@ -26,11 +31,13 @@ struct G2D_Rect{
     int h;
 };
 
+// G2D Point struct
 struct G2D_Point{
     int x;
     int y;
 };
 
+// G2D BlendMode struct
 enum G2D_BlendMode{
     G2D_BLENDMODE_NONE,
     G2D_BLENDMODE_BLEND,
@@ -38,11 +45,25 @@ enum G2D_BlendMode{
     G2D_BLENDMODE_MOD
 };
 
+// G2D Event struct
+enum G2D_MouseState{
+    G2D_MOUSEDOWN,
+    G2D_MOUSEUP,
+    G2D_MOUSEMOVE
+};
+struct G2D_Event{
+    G2D_MouseState mouse_state;
+    int mouse_x;
+    int mouse_y;
+
+    const Uint8* key_state;
+};
+
 class G2D_Engine{
     friend class G2D_Texture;
 
 private:
-    SDL_Renderer* _renderer;
+    SDL_Renderer* _renderer = nullptr;
 
     // Window
     SDL_Window* _window = nullptr;
@@ -59,8 +80,10 @@ private:
     bool _debug = false;
     std::string _error = "";
     bool _has_error = false;
-
     void setError(const char *text, ...);
+
+    // SDL_Event to G2D_Event
+    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
 
 public:
     G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
@@ -78,15 +101,18 @@ public:
     double getDrawScale();
 
 
-    void start(void (*event)(SDL_Event), void (*loop)(int), void (*render)());
+    void start(void (*event)(G2D_Event), void (*loop)(int), void (*render)());
 };
 
 
 class G2D_Texture{
     friend class G2D_Text;
+    friend class G2D_Engine;
 
 private:
-    G2D_Engine *_engine = nullptr;
+    // Engine reference
+    static G2D_Engine *_engine;
+
     SDL_Texture *_texture = nullptr;
 
     int _src_width;
@@ -94,13 +120,12 @@ private:
     int _src_height;
     int _height;
 
-    bool loadFromFont(G2D_Font *font, const char *text, G2D_Color color);
+    G2D_Texture(G2D_Font *font, const char *text, G2D_Color color);
 
 public:
-    G2D_Texture(G2D_Engine *engine);
+    G2D_Texture(const char *path);
     ~G2D_Texture();
 
-    bool loadFromFile(const char *path);
     void free();
 
     void setColor(G2D_Color color);
@@ -119,14 +144,20 @@ public:
 
 class G2D_Font{
     friend class G2D_Texture;
+    friend class G2D_Engine;
 
 private:
+    // Engine reference
+    static G2D_Engine *_engine;
+
     TTF_Font *_font = nullptr;
-    std::string _font_name;
+    std::string _path;
     int _size;
 
+    bool loadFont(const char *path, int size);
+
 public:
-    G2D_Font(const char *font_name, int size);
+    G2D_Font(const char *path, int size);
     ~G2D_Font();
 
     void free();
@@ -135,10 +166,14 @@ public:
 };
 
 class G2D_Text{
+    friend class G2D_Engine;
+
 private:
-    G2D_Engine *_engine;
-    G2D_Font *_font;
-    G2D_Texture *_texture;
+    // Engine reference
+    static G2D_Engine *_engine;
+
+    G2D_Font *_font = nullptr;
+    G2D_Texture *_texture = nullptr;
 
     std::string _text;
     G2D_Color _color;
@@ -146,7 +181,7 @@ private:
     void reloadTexture();
 
 public:
-    G2D_Text(G2D_Engine *engine, G2D_Font *font, const char *text, ...);
+    G2D_Text(G2D_Font *font, const char *text, ...);
     ~G2D_Text();
 
     void setColor(G2D_Color color);
@@ -157,6 +192,28 @@ public:
 
 
     void render(int x, int y);
+};
+
+class G2D_Music{
+    friend class G2D_Engine;
+
+private:
+    // Engine reference
+    static G2D_Engine *_engine;
+
+    static G2D_Music *_playing_now;
+    Mix_Music *_music = nullptr;
+
+public:
+    G2D_Music(const char *path);
+    ~G2D_Music();
+
+    void play(bool looping = true);
+    void resume();
+    void pause();
+    void stop();
+
+    void free();
 };
 
 

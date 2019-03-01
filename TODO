@@ -2,3 +2,4 @@
 - Button class
     Click detection
 - Sprite
+- Fix engine->setDrawScale()

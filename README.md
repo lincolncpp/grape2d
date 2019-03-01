@@ -9,7 +9,8 @@ Before you use, you will need to install the following libraries
 - SDL2
 - SDL2_ttf
 - SDL2_image
- 
+- SDL2_mixer
+
 ### Installing
 To install you will need to download the source code and build using the make command
 ```

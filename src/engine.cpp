@@ -1,6 +1,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
+#include "SDL2/SDL_mixer.h"
 
 #include <string>
 
@@ -10,7 +11,7 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
     _debug = debug;
 
     // Initialize SDL
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         setError("SDL could not initialize! SDL_Error: %s", SDL_GetError());
     }
     else {
@@ -37,13 +38,24 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
                     setError("Renderer could not be created! SDL Error: %s", SDL_GetError());
                 }
                 else{
+                    SDL_SetRenderDrawColor(_renderer, 0x00, 0x00, 0x00, 0xFF);
+
                     // Initialize SDL_ttf
                     if(TTF_Init() == -1) {
                         setError("SDL_ttf could not initialize! SDL_ttf Error: %s", TTF_GetError());
                     }
                     else{
-                        // Initialize renderer color
-                        SDL_SetRenderDrawColor(_renderer, 0x00, 0x00, 0x00, 0xFF);
+                        //Initialize SDL_mixer
+                        if (Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) {
+                            setError("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+                        }
+                        else{
+                            // Linking to all modules
+                            G2D_Texture::_engine = this;
+                            G2D_Font::_engine = this;
+                            G2D_Text::_engine = this;
+                            G2D_Texture::_engine = this;
+                        }
                     }
                 }
             }
@@ -61,6 +73,7 @@ G2D_Engine::~G2D_Engine() {
     IMG_Quit();
     SDL_Quit();
     TTF_Quit();
+    Mix_Quit();
 }
 
 bool G2D_Engine::hasError() {
@@ -107,7 +120,23 @@ double G2D_Engine::getDrawScale() {
     return _draw_scale;
 }
 
-void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(int), void (*render)()) {
+G2D_Event G2D_Engine::convertSDLEventtoG2DEvent(SDL_Event e) {
+    G2D_Event ge = {};
+
+    // Setting mouse x, y
+    SDL_GetMouseState(&ge.mouse_x, &ge.mouse_y);
+
+    // Setting mouse state
+    if (e.type == SDL_MOUSEMOTION)          ge.mouse_state = G2D_MOUSEMOVE;
+    else if (e.type == SDL_MOUSEBUTTONDOWN) ge.mouse_state = G2D_MOUSEDOWN;
+    else if (e.type == SDL_MOUSEBUTTONUP)   ge.mouse_state = G2D_MOUSEUP;
+
+    ge.key_state = SDL_GetKeyboardState(nullptr);
+
+    return ge;
+}
+
+void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(int), void (*render)()) {
     if (_has_error) return;
     if (render == nullptr) return;
 
@@ -127,7 +156,7 @@ void G2D_Engine::start(void (*event)(SDL_Event), void (*loop)(int), void (*rende
             }
 
             if (event != nullptr){
-                event(e);
+                event(convertSDLEventtoG2DEvent(e));
             }
         }
 

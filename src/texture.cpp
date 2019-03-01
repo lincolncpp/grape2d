@@ -1,58 +1,52 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
+#include "SDL2/SDL_mixer.h"
 
 #include <string>
 
 #include "../include/grape2d.h"
 
-G2D_Texture::G2D_Texture(G2D_Engine *engine) {
-    _engine = engine;
-}
+G2D_Engine *G2D_Texture::_engine = nullptr;
+
 
 G2D_Texture::~G2D_Texture() {
     free();
 }
 
-bool G2D_Texture::loadFromFile(const char *path) {
+G2D_Texture::G2D_Texture(const char *path) {
     free();
 
     // Loading from file
-    _texture = IMG_LoadTexture(_engine->_renderer, path);
+    _texture = IMG_LoadTexture(G2D_Texture::_engine->_renderer, path);
 
     if (_texture == nullptr){
-        _engine->setError("Error on loading texture from file '%s'", path);
-        return false;
-    }
-    else{
-        // Getting texture dimensions
-        SDL_QueryTexture(_texture, nullptr, nullptr, &_src_width, &_src_height);
-
-        _width = _src_width;
-        _height = _src_height;
+        printf("Error on loading texture. %s\n", IMG_GetError());
+        return;
     }
 
-    return true;
+    // Getting texture dimensions
+    SDL_QueryTexture(_texture, nullptr, nullptr, &_src_width, &_src_height);
+
+    _width = _src_width;
+    _height = _src_height;
 }
 
-bool G2D_Texture::loadFromFont(G2D_Font *font, const char *text, G2D_Color color) {
+G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
     free();
 
     SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
 
     SDL_Surface *textSurface = TTF_RenderText_Blended(font->_font, text, sdl_color);
     if (textSurface == nullptr){
-        _engine->setError("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-
-        return false;
+        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
     }
     else{
-        _texture = SDL_CreateTextureFromSurface(_engine->_renderer, textSurface);
+        _texture = SDL_CreateTextureFromSurface(G2D_Texture::_engine->_renderer, textSurface);
 
         if (_texture == nullptr){
-            _engine->setError("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
+            printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
 
-            return false;
         }
         else{
             _src_width = _width = textSurface->w;
@@ -61,8 +55,6 @@ bool G2D_Texture::loadFromFont(G2D_Font *font, const char *text, G2D_Color color
 
         SDL_FreeSurface(textSurface);
     }
-
-    return true;
 }
 
 void G2D_Texture::free() {
@@ -96,7 +88,7 @@ void G2D_Texture::setAlpha(Uint8 alpha) {
 }
 
 void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
-    double scale = _engine->_draw_scale;
+    double scale = G2D_Texture::_engine->_draw_scale;
 
     SDL_Rect rect = {x, y, int(_width*scale), int(_height*scale)};
     SDL_Rect *clip2 = nullptr;
@@ -132,7 +124,7 @@ void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *
         flip = SDL_FLIP_VERTICAL;
     }
 
-    SDL_RenderCopyEx(_engine->_renderer, _texture, clip2, &rect, angle, center2, flip);
+    SDL_RenderCopyEx(G2D_Texture::_engine->_renderer, _texture, clip2, &rect, angle, center2, flip);
 }
 
 

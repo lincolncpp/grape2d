@@ -1,13 +1,15 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
+#include "SDL2/SDL_mixer.h"
 
 #include <string>
 
 #include "../include/grape2d.h"
 
-G2D_Text::G2D_Text(G2D_Engine *engine, G2D_Font *font, const char *text, ...) {
-    _engine = engine;
+G2D_Engine *G2D_Text::_engine = nullptr;
+
+G2D_Text::G2D_Text(G2D_Font *font, const char *text, ...) {
     _font = font;
 
     char *msg = nullptr;
@@ -18,8 +20,6 @@ G2D_Text::G2D_Text(G2D_Engine *engine, G2D_Font *font, const char *text, ...) {
 
     _text = text;
     _color = {0, 0, 0, 255};
-
-    _texture = new G2D_Texture(_engine);
 
     reloadTexture();
 }
@@ -71,5 +71,5 @@ void G2D_Text::render(int x, int y) {
 }
 
 void G2D_Text::reloadTexture() {
-    _texture->loadFromFont(_font, _text.c_str(), _color);
+    _texture = new G2D_Texture(_font, _text.c_str(), _color);
 }
