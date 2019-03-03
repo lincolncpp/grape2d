@@ -32,28 +32,30 @@ void G2D_Music::updateVolume() {
     }
 }
 
-bool G2D_Music::play(bool looping) {
-    if (Mix_PlayMusic(_music, looping?-1:0) == -1){
+int G2D_Music::play(bool looping) {
+    int channel = Mix_PlayMusic(_music, looping?-1:0);
+    if (channel == -1){
         printf("Error on playing music. %s\n", Mix_GetError());
-        return false;
+    }
+    else{
+        G2D_Music::_playing_now = this;
+        updateVolume();
     }
 
-    G2D_Music::_playing_now = this;
-    updateVolume();
-
-    return true;
+    return channel;
 }
 
-bool G2D_Music::playFadeIn(bool looping, int effect_time_ms) {
-    if (Mix_FadeInMusic(_music, looping?-1:0, effect_time_ms) == -1){
+int G2D_Music::playFadeIn(bool looping, int effect_time_ms) {
+    int channel = Mix_FadeInMusic(_music, looping?-1:0, effect_time_ms);
+    if (channel == -1){
         printf("Error on playing music. %s\n", Mix_GetError());
-        return false;
+    }
+    else{
+        G2D_Music::_playing_now = this;
+        updateVolume();
     }
 
-    G2D_Music::_playing_now = this;
-    updateVolume();
-
-    return true;
+    return channel;
 }
 
 void G2D_Music::rewind() {

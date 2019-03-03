@@ -234,8 +234,8 @@ public:
     G2D_Music(const char *path);
     ~G2D_Music();
 
-    bool play(bool looping = true);
-    bool playFadeIn(bool looping = true, int effect_time_ms = 1000);
+    int play(bool looping = true);
+    int playFadeIn(bool looping = true, int effect_time_ms = 1000);
 
     void rewind();
 
@@ -266,7 +266,7 @@ public:
     ~G2D_SFX();
 
     void setChannel(int channel);
-    bool play(int repeat_times = 0, int limit_ms = -1);
+    int play(int repeat_times = 0, int limit_ms = -1);
 
     void setVolume(int volume);
     int getVolume();

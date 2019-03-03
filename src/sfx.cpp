@@ -26,13 +26,13 @@ void G2D_SFX::setChannel(int channel) {
     _channel = channel;
 }
 
-bool G2D_SFX::play(int repeat_times, int limit_ms) {
-    if (Mix_PlayChannelTimed(_channel, _sound, repeat_times, limit_ms) == -1){
+int G2D_SFX::play(int repeat_times, int limit_ms) {
+    int channel = Mix_PlayChannelTimed(_channel, _sound, repeat_times, limit_ms);
+    if (channel == -1){
         printf("Error on playing sound. %s\n", Mix_GetError());
-        return false;
     }
 
-    return true;
+    return channel;
 }
 
 void G2D_SFX::setVolume(int volume){
