@@ -24,13 +24,55 @@ G2D_Music::~G2D_Music() {
     free();
 }
 
-void G2D_Music::play(bool looping) {
-    if (Mix_PlayingMusic()){
-        Mix_HaltMusic();
+void G2D_Music::updateVolume() {
+    if (G2D_Music::_playing_now == this) {
+        int v = (int) round(((float)_volume / 100.0f) * MIX_MAX_VOLUME);
+
+        Mix_VolumeMusic(v);
+    }
+}
+
+bool G2D_Music::play(bool looping) {
+    if (Mix_PlayMusic(_music, looping?-1:0) == -1){
+        printf("Error on playing music. %s\n", Mix_GetError());
+        return false;
     }
 
-    Mix_PlayMusic(_music, looping?-1:0);
     G2D_Music::_playing_now = this;
+    updateVolume();
+
+    return true;
+}
+
+bool G2D_Music::playFadeIn(bool looping, int effect_time_ms) {
+    if (Mix_FadeInMusic(_music, looping?-1:0, effect_time_ms) == -1){
+        printf("Error on playing music. %s\n", Mix_GetError());
+        return false;
+    }
+
+    G2D_Music::_playing_now = this;
+    updateVolume();
+
+    return true;
+}
+
+void G2D_Music::rewind() {
+    if (Mix_PlayingMusic() && !Mix_PausedMusic() && G2D_Music::_playing_now == this) {
+        Mix_RewindMusic();
+    }
+}
+
+void G2D_Music::setVolume(int volume) {
+    if (volume < 0) volume = 0;
+    if (volume > 100) volume = 100;
+
+    _volume = volume;
+
+    updateVolume();
+}
+
+int G2D_Music::getVolume() {
+    return _volume;
 }
 
 void G2D_Music::resume() {
@@ -48,6 +90,12 @@ void G2D_Music::pause() {
 void G2D_Music::stop() {
     if (Mix_PlayingMusic() && G2D_Music::_playing_now == this){
         Mix_HaltMusic();
+    }
+}
+
+void G2D_Music::stopFadeOut(int effect_time_ms) {
+    if (Mix_PlayingMusic() && G2D_Music::_playing_now == this) {
+        Mix_FadeOutMusic(effect_time_ms);
     }
 }
 

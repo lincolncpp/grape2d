@@ -85,6 +85,27 @@ private:
     // SDL_Event to G2D_Event
     G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
 
+    // Mixer
+    class G2D_Mixer{
+    public:
+        void setChannelVolume(int volume, int channel = -1);
+        int getChannelVolume(int channel = -1);
+
+        void setMaxChannels(int num_channels);
+
+        void resumeChannel(int channel = -1);
+        void pauseChannel(int channel = -1);
+        void endChannel(int channel);
+        void endChannelTimed(int channel, int time_ms);
+        void endChannelFadeOut(int channel, int time_ms);
+
+
+        void setPlanning(int channel, Uint8 left, Uint8 right);
+        void setDistance(int channel, Uint8 distance);
+        void setPosition(int channel, Sint16 angle, Uint8 distance);
+        void removeEffects(int channel);
+    };
+
 public:
     G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();
@@ -100,6 +121,7 @@ public:
     void setDrawScale(double scale);
     double getDrawScale();
 
+    G2D_Mixer *mixer = nullptr;
 
     void start(void (*event)(G2D_Event), void (*loop)(int), void (*render)());
 };
@@ -204,16 +226,53 @@ private:
     static G2D_Music *_playing_now;
     Mix_Music *_music = nullptr;
 
+    int _volume = 100;
+
+    void updateVolume();
+
 public:
     G2D_Music(const char *path);
     ~G2D_Music();
 
-    void play(bool looping = true);
+    bool play(bool looping = true);
+    bool playFadeIn(bool looping = true, int effect_time_ms = 1000);
+
+    void rewind();
+
     void resume();
     void pause();
     void stop();
+    void stopFadeOut(int effect_time_ms = 1000);
+
+    void setVolume(int volume);
+    int getVolume();
+
 
     void free();
+};
+
+class G2D_SFX{
+    friend class G2D_Engine;
+
+private:
+    // Engine reference
+    static G2D_Engine *_engine;
+
+    Mix_Chunk *_sound = nullptr;
+    int _channel = -1;
+
+public:
+    G2D_SFX(const char *path);
+    ~G2D_SFX();
+
+    void setChannel(int channel);
+    bool play(int repeat_times = 0, int limit_ms = -1);
+
+    void setVolume(int volume);
+    int getVolume();
+
+    void free();
+
 };
 
 

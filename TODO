@@ -3,3 +3,4 @@
     Click detection
 - Sprite
 - Fix engine->setDrawScale()
+- Create sound class
