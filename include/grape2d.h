@@ -11,7 +11,7 @@
 #define G2D_MIN_CHANNEL 2
 #define G2D_MAX_CHANNEL 10000
 
-#define G2D_DEFAULT_AUDIBLE_DISTANCE 1000
+#define G2D_DEFAULT_AUDIBLE_RADIUS 1000
 
 #define PI 3.14159265
 
@@ -77,36 +77,8 @@ class G2D_Engine{
 private:
     static G2D_Engine *instance;
 
-    SDL_Renderer* _renderer = nullptr;
-
-    // Window
-    SDL_Window* _window = nullptr;
-    int _window_width;
-    int _window_height;
-
-    // FPS
-    int _real_fps = 0;
-
-    // Ambient 2D (SFX Effect)
-    G2D_SFX *_sfx2d[G2D_MAX_CHANNEL] = {};
-
-    void addSFX2D(G2D_SFX *sfx, int channel);
-    void updateSFX2D();
-
-    // SDL_Event to G2D_Event
-    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
-
-    // Error
-    bool _debug = false;
-    std::string _error = "";
-    bool _has_error = false;
-    void setError(const char *text, ...);
-
     // Mixer
     class G2D_Mixer{
-    private:
-        int _audible_distance = G2D_DEFAULT_AUDIBLE_DISTANCE;
-
     public:
         void setChannelVolume(int volume, int channel = -1);
         int getChannelVolume(int channel = -1);
@@ -124,9 +96,6 @@ private:
         void setDistance(int channel, Uint8 distance);
         void setPosition(int channel, Sint16 angle, Uint8 distance);
         void removeEffects(int channel);
-
-        void setAudibleDistance(int distance);
-        int getAudibleDistance();
     };
 
     // Camera
@@ -145,9 +114,48 @@ private:
 
     };
 
+    // 2D Audio
+    class G2D_2DAudio{
+        friend class G2D_Engine;
+        friend class G2D_SFX;
+
+    private:
+        int _audible_radius = G2D_DEFAULT_AUDIBLE_RADIUS;
+
+        G2D_SFX *_sfx2d[G2D_MAX_CHANNEL] = {};
+
+        void add(G2D_SFX *sfx, int channel);
+        void update();
+
+    public:
+        void setAudibleRadius(int radius);
+        int getAudibleRadius();
+    };
+
+    // Engine
+    SDL_Renderer* _renderer = nullptr;
+
+    // Window
+    SDL_Window* _window = nullptr;
+    int _window_width;
+    int _window_height;
+
+    // FPS
+    int _real_fps = 0;
+
+    // SDL_Event to G2D_Event
+    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
+
+    // Error
+    bool _debug = false;
+    std::string _error = "";
+    bool _has_error = false;
+    void setError(const char *text, ...);
+
 public:
     G2D_Mixer *mixer = nullptr;
     G2D_Camera *camera = nullptr;
+    G2D_2DAudio *audio2d = nullptr;
 
     G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();

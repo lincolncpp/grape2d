@@ -34,7 +34,7 @@ int G2D_SFX::play(int repeat_times, int limit_ms) {
         printf("Error on playing sound. %s\n", Mix_GetError());
     }
     else{
-        if (_sound_2d) G2D_Engine::instance->addSFX2D(this, channel);
+        if (_sound_2d) G2D_Engine::instance->audio2d->add(this, channel);
     }
 
     return channel;

@@ -58,6 +58,8 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
                             Mix_AllocateChannels(100);
 
                             camera = new G2D_Camera();
+
+                            audio2d = new G2D_2DAudio;
                         }
                     }
                 }
@@ -147,7 +149,7 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*re
 
         // Sound effect update (Ambient 2D)
         if (framei % 20 == 0){
-            updateSFX2D();
+            audio2d->update();
         }
 
         // Input handle event
@@ -180,46 +182,6 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*re
             _real_fps = frame;
 
             frame = 0;
-        }
-    }
-}
-
-void G2D_Engine::addSFX2D(G2D_SFX *sfx, int channel) {
-    _sfx2d[channel] = sfx;
-}
-
-void G2D_Engine::updateSFX2D() {
-    for (int i = 0;i < G2D_MAX_CHANNEL;i++){
-        if (_sfx2d[i] != nullptr && Mix_Playing(i) && _sfx2d[i]->_sound_2d){
-            int sfx_x = _sfx2d[i]->getX();
-            int sfx_y = _sfx2d[i]->getY();
-            int cam_x = camera->getX();
-            int cam_y = camera->getY();
-
-            double a = sfx_x - cam_x;
-            double b = cam_y - sfx_y;
-            double distance = sqrt(pow(a, 2) + pow(b, 2));
-
-            double angle = 0;
-
-            if (a == 0 && b > 0)        angle = 0;
-            else if (a > 0 && b == 0)   angle = PI/2.0f;
-            else if (a == 0 && b < 0)   angle = PI;
-            else if (a < 0 && b == 0)   angle = 3.0f/2.0f*PI;
-
-            else if (a > 0 && b > 0)    angle = atan(a/b);
-            else if (a > 0 && b < 0)    angle = atan(-b/a) + PI/2.0f;
-            else if (a < 0 && b < 0)    angle = atan(-a/-b) + PI;
-            else if (a < 0 && b > 0)    angle = atan(b/-a) + 3.0f/2.0f*PI;
-
-            angle = angle*180.0f/PI;
-
-            if (distance > mixer->getAudibleDistance()) distance = mixer->getAudibleDistance();
-            Uint8 d = (Uint8)((distance/(double)mixer->getAudibleDistance())*255);
-
-            mixer->setPosition(i, (Sint16)angle, d);
-
-            printf("a: %f, b: %f, distance: %d, angle: %f deegres\n", a, b, d, angle);
         }
     }
 }
@@ -289,16 +251,6 @@ void G2D_Engine::G2D_Mixer::removeEffects(int channel) {
     }
 }
 
-void G2D_Engine::G2D_Mixer::setAudibleDistance(int distance) {
-    if (distance < 1) distance = 1;
-
-    _audible_distance = distance;
-}
-
-int G2D_Engine::G2D_Mixer::getAudibleDistance() {
-    return _audible_distance;
-}
-
 // G2D_Camera
 
 G2D_Engine::G2D_Camera::G2D_Camera() {
@@ -325,4 +277,60 @@ int G2D_Engine::G2D_Camera::getX() {
 
 int G2D_Engine::G2D_Camera::getY() {
     return _y;
+}
+
+// G2D_2DAudio
+void G2D_Engine::G2D_2DAudio::add(G2D_SFX *sfx, int channel) {
+    _sfx2d[channel] = sfx;
+}
+
+void G2D_Engine::G2D_2DAudio::update() {
+    for (int i = 0;i < G2D_MAX_CHANNEL;i++){
+        if (_sfx2d[i] != nullptr && _sfx2d[i]->_sound_2d){
+            if (Mix_Playing(i)) {
+                int sfx_x = _sfx2d[i]->getX();
+                int sfx_y = _sfx2d[i]->getY();
+                int cam_x = G2D_Engine::instance->camera->getX();
+                int cam_y = G2D_Engine::instance->camera->getY();
+
+
+                double a = sfx_x - cam_x;
+                double b = cam_y - sfx_y;
+                double distance = sqrt(pow(a, 2) + pow(b, 2));
+
+                double angle = 0;
+
+                if (a == 0 && b > 0) angle = 0;
+                else if (a > 0 && b == 0) angle = PI / 2.0f;
+                else if (a == 0 && b < 0) angle = PI;
+                else if (a < 0 && b == 0) angle = 3.0f / 2.0f * PI;
+
+                else if (a > 0 && b > 0) angle = atan(a / b);
+                else if (a > 0 && b < 0) angle = atan(-b / a) + PI / 2.0f;
+                else if (a < 0 && b < 0) angle = atan(-a / -b) + PI;
+                else if (a < 0 && b > 0) angle = atan(b / -a) + 3.0f / 2.0f * PI;
+
+                angle = angle * 180.0f / PI;
+
+                if (distance > _audible_radius) distance = _audible_radius;
+                auto d = (Uint8) ((distance / (double) _audible_radius) * 255);
+
+                G2D_Engine::instance->mixer->setPosition(i, (Sint16) angle, d);
+            }
+            else{
+                _sfx2d[i] = nullptr;
+                G2D_Engine::instance->mixer->removeEffects(i);
+            }
+        }
+    }
+}
+
+void G2D_Engine::G2D_2DAudio::setAudibleRadius(int radius) {
+    if (radius < 1) radius = 1;
+
+    _audible_radius = radius;
+}
+
+int G2D_Engine::G2D_2DAudio::getAudibleRadius() {
+    return _audible_radius;
 }
