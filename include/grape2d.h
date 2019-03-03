@@ -8,11 +8,19 @@
 
 #include <string>
 
+#define G2D_MIN_CHANNEL 2
+#define G2D_MAX_CHANNEL 10000
+
+#define G2D_DEFAULT_AUDIBLE_DISTANCE 1000
+
+#define PI 3.14159265
+
 class G2D_Engine;
 class G2D_Texture;
 class G2D_Font;
 class G2D_Text;
 class G2D_Music;
+class G2D_SFX;
 
 
 // G2D Color struct
@@ -61,8 +69,14 @@ struct G2D_Event{
 
 class G2D_Engine{
     friend class G2D_Texture;
+    friend class G2D_SFX;
+    friend class G2D_Music;
+    friend class G2D_Text;
+    friend class G2D_Font;
 
 private:
+    static G2D_Engine *instance;
+
     SDL_Renderer* _renderer = nullptr;
 
     // Window
@@ -73,8 +87,14 @@ private:
     // FPS
     int _real_fps = 0;
 
-    // Graphic control
-    double _draw_scale = 1;
+    // Ambient 2D (SFX Effect)
+    G2D_SFX *_sfx2d[G2D_MAX_CHANNEL] = {};
+
+    void addSFX2D(G2D_SFX *sfx, int channel);
+    void updateSFX2D();
+
+    // SDL_Event to G2D_Event
+    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
 
     // Error
     bool _debug = false;
@@ -82,11 +102,11 @@ private:
     bool _has_error = false;
     void setError(const char *text, ...);
 
-    // SDL_Event to G2D_Event
-    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
-
     // Mixer
     class G2D_Mixer{
+    private:
+        int _audible_distance = G2D_DEFAULT_AUDIBLE_DISTANCE;
+
     public:
         void setChannelVolume(int volume, int channel = -1);
         int getChannelVolume(int channel = -1);
@@ -104,9 +124,31 @@ private:
         void setDistance(int channel, Uint8 distance);
         void setPosition(int channel, Sint16 angle, Uint8 distance);
         void removeEffects(int channel);
+
+        void setAudibleDistance(int distance);
+        int getAudibleDistance();
+    };
+
+    // Camera
+    class G2D_Camera{
+    private:
+        int _x, _y = 0;
+
+    public:
+        G2D_Camera();
+
+        void setPosition(int x, int y);
+        void setX(int x);
+        void setY(int y);
+        int getX();
+        int getY();
+
     };
 
 public:
+    G2D_Mixer *mixer = nullptr;
+    G2D_Camera *camera = nullptr;
+
     G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();
 
@@ -118,12 +160,7 @@ public:
 
     int getFPS();
 
-    void setDrawScale(double scale);
-    double getDrawScale();
-
-    G2D_Mixer *mixer = nullptr;
-
-    void start(void (*event)(G2D_Event), void (*loop)(int), void (*render)());
+    void start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*render)());
 };
 
 
@@ -132,9 +169,6 @@ class G2D_Texture{
     friend class G2D_Engine;
 
 private:
-    // Engine reference
-    static G2D_Engine *_engine;
-
     SDL_Texture *_texture = nullptr;
 
     int _src_width;
@@ -169,9 +203,6 @@ class G2D_Font{
     friend class G2D_Engine;
 
 private:
-    // Engine reference
-    static G2D_Engine *_engine;
-
     TTF_Font *_font = nullptr;
     std::string _path;
     int _size;
@@ -191,9 +222,6 @@ class G2D_Text{
     friend class G2D_Engine;
 
 private:
-    // Engine reference
-    static G2D_Engine *_engine;
-
     G2D_Font *_font = nullptr;
     G2D_Texture *_texture = nullptr;
 
@@ -220,9 +248,6 @@ class G2D_Music{
     friend class G2D_Engine;
 
 private:
-    // Engine reference
-    static G2D_Engine *_engine;
-
     static G2D_Music *_playing_now;
     Mix_Music *_music = nullptr;
 
@@ -255,18 +280,27 @@ class G2D_SFX{
     friend class G2D_Engine;
 
 private:
-    // Engine reference
-    static G2D_Engine *_engine;
-
     Mix_Chunk *_sound = nullptr;
     int _channel = -1;
+
+    int _x, _y = 0;
+    bool _sound_2d;
 
 public:
     G2D_SFX(const char *path);
     ~G2D_SFX();
 
     void setChannel(int channel);
+    int getChannel();
+
     int play(int repeat_times = 0, int limit_ms = -1);
+
+    void sound2D(bool state);
+    void setPosition(int x, int y);
+    void setX(int x);
+    void setY(int y);
+    int getX();
+    int getY();
 
     void setVolume(int volume);
     int getVolume();

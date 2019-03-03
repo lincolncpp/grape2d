@@ -7,8 +7,6 @@
 
 #include "../include/grape2d.h"
 
-G2D_Engine *G2D_Font::_engine = nullptr;
-
 G2D_Font::G2D_Font(const char *path, int size) {
     _path = path;
     _size = size;

@@ -7,6 +7,8 @@
 
 #include "../include/grape2d.h"
 
+G2D_Engine *G2D_Engine::instance = nullptr;
+
 G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uint32 SDL_flags) {
     _debug = debug;
 
@@ -50,15 +52,12 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
                             setError("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
                         }
                         else{
-                            // Linking to all modules
-                            G2D_Texture::_engine = this;
-                            G2D_Font::_engine = this;
-                            G2D_Text::_engine = this;
-                            G2D_Texture::_engine = this;
-                            G2D_SFX::_engine = this;
+                            G2D_Engine::instance = this;
 
                             mixer = new G2D_Mixer();
                             Mix_AllocateChannels(100);
+
+                            camera = new G2D_Camera();
                         }
                     }
                 }
@@ -116,14 +115,6 @@ int G2D_Engine::getFPS() {
     return _real_fps;
 }
 
-void G2D_Engine::setDrawScale(double scale) {
-    _draw_scale = scale;
-}
-
-double G2D_Engine::getDrawScale() {
-    return _draw_scale;
-}
-
 G2D_Event G2D_Engine::convertSDLEventtoG2DEvent(SDL_Event e) {
     G2D_Event ge = {};
 
@@ -140,7 +131,7 @@ G2D_Event G2D_Engine::convertSDLEventtoG2DEvent(SDL_Event e) {
     return ge;
 }
 
-void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(int), void (*render)()) {
+void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*render)()) {
     if (_has_error) return;
     if (render == nullptr) return;
 
@@ -149,9 +140,15 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(int), void (*rende
 
     Uint32 tick = SDL_GetTicks();
     int frame = 0;
+    Uint32 framei = 0;
 
     // Main loop
     while (!quit) {
+
+        // Sound effect update (Ambient 2D)
+        if (framei % 20 == 0){
+            updateSFX2D();
+        }
 
         // Input handle event
         while (SDL_PollEvent(&e) != 0){
@@ -166,7 +163,7 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(int), void (*rende
 
         // Logic game loop
         if (loop != nullptr){
-            loop(frame);
+            loop(framei);
         }
 
         // Render
@@ -176,6 +173,7 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(int), void (*rende
 
         // FPS count
         frame++;
+        framei++;
         Uint32 current_tick = SDL_GetTicks();
         if (current_tick > tick+1000){
             tick = current_tick;
@@ -185,6 +183,48 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(int), void (*rende
         }
     }
 }
+
+void G2D_Engine::addSFX2D(G2D_SFX *sfx, int channel) {
+    _sfx2d[channel] = sfx;
+}
+
+void G2D_Engine::updateSFX2D() {
+    for (int i = 0;i < G2D_MAX_CHANNEL;i++){
+        if (_sfx2d[i] != nullptr && Mix_Playing(i) && _sfx2d[i]->_sound_2d){
+            int sfx_x = _sfx2d[i]->getX();
+            int sfx_y = _sfx2d[i]->getY();
+            int cam_x = camera->getX();
+            int cam_y = camera->getY();
+
+            double a = sfx_x - cam_x;
+            double b = cam_y - sfx_y;
+            double distance = sqrt(pow(a, 2) + pow(b, 2));
+
+            double angle = 0;
+
+            if (a == 0 && b > 0)        angle = 0;
+            else if (a > 0 && b == 0)   angle = PI/2.0f;
+            else if (a == 0 && b < 0)   angle = PI;
+            else if (a < 0 && b == 0)   angle = 3.0f/2.0f*PI;
+
+            else if (a > 0 && b > 0)    angle = atan(a/b);
+            else if (a > 0 && b < 0)    angle = atan(-b/a) + PI/2.0f;
+            else if (a < 0 && b < 0)    angle = atan(-a/-b) + PI;
+            else if (a < 0 && b > 0)    angle = atan(b/-a) + 3.0f/2.0f*PI;
+
+            angle = angle*180.0f/PI;
+
+            if (distance > mixer->getAudibleDistance()) distance = mixer->getAudibleDistance();
+            Uint8 d = (Uint8)((distance/(double)mixer->getAudibleDistance())*255);
+
+            mixer->setPosition(i, (Sint16)angle, d);
+
+            printf("a: %f, b: %f, distance: %d, angle: %f deegres\n", a, b, d, angle);
+        }
+    }
+}
+
+// G2D_Mixer
 
 void G2D_Engine::G2D_Mixer::setChannelVolume(int volume, int channel){
     int v = (int)round(((float)volume/100.0f)*MIX_MAX_VOLUME);
@@ -199,6 +239,9 @@ int G2D_Engine::G2D_Mixer::getChannelVolume(int channel) {
 }
 
 void G2D_Engine::G2D_Mixer::setMaxChannels(int num_channels) {
+    if (num_channels < G2D_MIN_CHANNEL) num_channels = G2D_MIN_CHANNEL;
+    if (num_channels > G2D_MAX_CHANNEL) num_channels = G2D_MAX_CHANNEL;
+
     Mix_AllocateChannels(num_channels);
 }
 
@@ -244,4 +287,42 @@ void G2D_Engine::G2D_Mixer::removeEffects(int channel) {
     if(!Mix_UnregisterAllEffects(channel)) {
         printf("Error on remove effects. %s\n", Mix_GetError());
     }
+}
+
+void G2D_Engine::G2D_Mixer::setAudibleDistance(int distance) {
+    if (distance < 1) distance = 1;
+
+    _audible_distance = distance;
+}
+
+int G2D_Engine::G2D_Mixer::getAudibleDistance() {
+    return _audible_distance;
+}
+
+// G2D_Camera
+
+G2D_Engine::G2D_Camera::G2D_Camera() {
+    _x = G2D_Engine::instance->getWindowWidth()/2;
+    _y = G2D_Engine::instance->getWindowHeight()/2;
+}
+
+void G2D_Engine::G2D_Camera::setPosition(int x, int y) {
+    _x = x;
+    _y = y;
+}
+
+void G2D_Engine::G2D_Camera::setX(int x) {
+    _x = x;
+}
+
+void G2D_Engine::G2D_Camera::setY(int y) {
+    _y = y;
+}
+
+int G2D_Engine::G2D_Camera::getX() {
+    return _x;
+}
+
+int G2D_Engine::G2D_Camera::getY() {
+    return _y;
 }

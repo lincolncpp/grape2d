@@ -7,8 +7,6 @@
 
 #include "../include/grape2d.h"
 
-G2D_Engine *G2D_SFX::_engine = nullptr;
-
 G2D_SFX::G2D_SFX(const char *path) {
     _sound = Mix_LoadWAV(path);
 
@@ -26,13 +24,45 @@ void G2D_SFX::setChannel(int channel) {
     _channel = channel;
 }
 
+int G2D_SFX::getChannel() {
+    return _channel;
+}
+
 int G2D_SFX::play(int repeat_times, int limit_ms) {
     int channel = Mix_PlayChannelTimed(_channel, _sound, repeat_times, limit_ms);
     if (channel == -1){
         printf("Error on playing sound. %s\n", Mix_GetError());
     }
+    else{
+        if (_sound_2d) G2D_Engine::instance->addSFX2D(this, channel);
+    }
 
     return channel;
+}
+
+void G2D_SFX::sound2D(bool state) {
+    _sound_2d = state;
+}
+
+void G2D_SFX::setPosition(int x, int y) {
+    _x = x;
+    _y = y;
+}
+
+void G2D_SFX::setX(int x) {
+    _x = x;
+}
+
+void G2D_SFX::setY(int y) {
+    _y = y;
+}
+
+int G2D_SFX::getX() {
+    return _x;
+}
+
+int G2D_SFX::getY() {
+    return _y;
 }
 
 void G2D_SFX::setVolume(int volume){

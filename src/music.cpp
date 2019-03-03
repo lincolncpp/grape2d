@@ -7,8 +7,6 @@
 
 #include "../include/grape2d.h"
 
-G2D_Engine *G2D_Music::_engine = nullptr;
-
 G2D_Music *G2D_Music::_playing_now = nullptr;
 
 G2D_Music::G2D_Music(const char *path) {

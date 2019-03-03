@@ -7,9 +7,6 @@
 
 #include "../include/grape2d.h"
 
-G2D_Engine *G2D_Texture::_engine = nullptr;
-
-
 G2D_Texture::~G2D_Texture() {
     free();
 }
@@ -18,7 +15,7 @@ G2D_Texture::G2D_Texture(const char *path) {
     free();
 
     // Loading from file
-    _texture = IMG_LoadTexture(G2D_Texture::_engine->_renderer, path);
+    _texture = IMG_LoadTexture(G2D_Engine::instance->_renderer, path);
 
     if (_texture == nullptr){
         printf("Error on loading texture. %s\n", IMG_GetError());
@@ -42,7 +39,7 @@ G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
         printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
     }
     else{
-        _texture = SDL_CreateTextureFromSurface(G2D_Texture::_engine->_renderer, textSurface);
+        _texture = SDL_CreateTextureFromSurface(G2D_Engine::instance->_renderer, textSurface);
 
         if (_texture == nullptr){
             printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
@@ -88,17 +85,15 @@ void G2D_Texture::setAlpha(Uint8 alpha) {
 }
 
 void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
-    double scale = G2D_Texture::_engine->_draw_scale;
-
-    SDL_Rect rect = {x, y, int(_width*scale), int(_height*scale)};
+    SDL_Rect rect = {x, y, _width, _height};
     SDL_Rect *clip2 = nullptr;
     SDL_Point *center2 = nullptr;
     SDL_RendererFlip flip = SDL_FLIP_NONE;
 
     if (clip != nullptr){
         if (_src_width == _width && _src_height == _height) {
-            rect.w = int(clip->w * scale);
-            rect.h = int(clip->h * scale);
+            rect.w = clip->w;
+            rect.h = clip->h;
         }
 
         clip2 = new SDL_Rect();
@@ -124,7 +119,7 @@ void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *
         flip = SDL_FLIP_VERTICAL;
     }
 
-    SDL_RenderCopyEx(G2D_Texture::_engine->_renderer, _texture, clip2, &rect, angle, center2, flip);
+    SDL_RenderCopyEx(G2D_Engine::instance->_renderer, _texture, clip2, &rect, angle, center2, flip);
 }
 
 
