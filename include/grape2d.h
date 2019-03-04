@@ -100,8 +100,13 @@ private:
 
     // Camera
     class G2D_Camera{
+        friend class G2D_Texture;
+
     private:
         int _x, _y = 0;
+
+        int getDrawXAdd();
+        int getDrawYAdd();
 
     public:
         G2D_Camera();
