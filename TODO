@@ -2,5 +2,4 @@
 - Button class
     Click detection
 - Sprite
-- Fix engine->setDrawScale()
-- Create sound class
+- Camera

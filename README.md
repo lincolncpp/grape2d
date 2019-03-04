@@ -1,5 +1,5 @@
 # Grape2D
-2D graphic engine for Linux utilizing SDL2/C++
+2D game engine for Linux utilizing SDL2/C++
 
 ## Getting started
 You can install, uninstall and build from source code directly from the Makefile.
