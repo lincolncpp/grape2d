@@ -7,22 +7,22 @@
 
 #include "../include/grape2d.h"
 
-void G2D_Engine::G2D_2DAudio::add(G2D_SFX *sfx, int channel) {
-    _sfx2d[channel] = sfx;
+void G2D_Engine::G2D_Audio::add(G2D_Sound *sound, int channel) {
+    _sound[channel] = sound;
 }
 
-void G2D_Engine::G2D_2DAudio::update() {
+void G2D_Engine::G2D_Audio::update() {
     for (int i = 0;i < G2D_MAX_CHANNEL;i++){
-        if (_sfx2d[i] != nullptr && _sfx2d[i]->_sound_2d){
+        if (_sound[i] != nullptr && _sound[i]->_2d_effect){
             if (Mix_Playing(i)) {
-                int sfx_x = _sfx2d[i]->getX();
-                int sfx_y = _sfx2d[i]->getY();
+                int sound_x = _sound[i]->getX();
+                int sound_y = _sound[i]->getY();
                 int cam_x = G2D_Engine::instance->camera->getX();
                 int cam_y = G2D_Engine::instance->camera->getY();
 
 
-                double a = sfx_x - cam_x;
-                double b = cam_y - sfx_y;
+                double a = sound_x - cam_x;
+                double b = cam_y - sound_y;
                 double distance = sqrt(pow(a, 2) + pow(b, 2));
 
                 double angle = 0;
@@ -45,19 +45,19 @@ void G2D_Engine::G2D_2DAudio::update() {
                 G2D_Engine::instance->mixer->setPosition(i, (Sint16) angle, d);
             }
             else{
-                _sfx2d[i] = nullptr;
+                _sound[i] = nullptr;
                 G2D_Engine::instance->mixer->removeEffects(i);
             }
         }
     }
 }
 
-void G2D_Engine::G2D_2DAudio::setAudibleRadius(int radius) {
+void G2D_Engine::G2D_Audio::setAudibleRadius(int radius) {
     if (radius < 1) radius = 1;
 
     _audible_radius = radius;
 }
 
-int G2D_Engine::G2D_2DAudio::getAudibleRadius() {
+int G2D_Engine::G2D_Audio::getAudibleRadius() {
     return _audible_radius;
 }

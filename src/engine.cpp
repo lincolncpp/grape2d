@@ -59,7 +59,7 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
 
                             camera = new G2D_Camera();
 
-                            audio2d = new G2D_2DAudio;
+                            audio = new G2D_Audio();
                         }
                     }
                 }
@@ -149,7 +149,7 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*re
 
         // Sound effect update (Ambient 2D)
         if (framei % 20 == 0){
-            audio2d->update();
+            audio->update();
         }
 
         // Input handle event

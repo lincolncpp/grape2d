@@ -33,9 +33,6 @@ G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
     free();
 
 
-    printf("%d\n", G2D_Engine::instance->camera->getDrawXAdd());
-
-
     SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
 
     SDL_Surface *textSurface = TTF_RenderText_Blended(font->_font, text, sdl_color);

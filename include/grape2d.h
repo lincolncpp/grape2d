@@ -20,7 +20,7 @@ class G2D_Texture;
 class G2D_Font;
 class G2D_Text;
 class G2D_Music;
-class G2D_SFX;
+class G2D_Sound;
 
 
 // G2D Color struct
@@ -69,7 +69,7 @@ struct G2D_Event{
 
 class G2D_Engine{
     friend class G2D_Texture;
-    friend class G2D_SFX;
+    friend class G2D_Sound;
     friend class G2D_Music;
     friend class G2D_Text;
     friend class G2D_Font;
@@ -119,17 +119,17 @@ private:
 
     };
 
-    // 2D Audio
-    class G2D_2DAudio{
+    // Audio effect
+    class G2D_Audio{
         friend class G2D_Engine;
-        friend class G2D_SFX;
+        friend class G2D_Sound;
 
     private:
         int _audible_radius = G2D_DEFAULT_AUDIBLE_RADIUS;
 
-        G2D_SFX *_sfx2d[G2D_MAX_CHANNEL] = {};
+        G2D_Sound *_sound[G2D_MAX_CHANNEL] = {};
 
-        void add(G2D_SFX *sfx, int channel);
+        void add(G2D_Sound *sound, int channel);
         void update();
 
     public:
@@ -148,19 +148,19 @@ private:
     // FPS
     int _real_fps = 0;
 
-    // SDL_Event to G2D_Event
-    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
-
     // Error
     bool _debug = false;
     std::string _error = "";
     bool _has_error = false;
     void setError(const char *text, ...);
 
+    // SDL_Event to G2D_Event
+    G2D_Event convertSDLEventtoG2DEvent(SDL_Event e);
+
 public:
     G2D_Mixer *mixer = nullptr;
     G2D_Camera *camera = nullptr;
-    G2D_2DAudio *audio2d = nullptr;
+    G2D_Audio *audio = nullptr;
 
     G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();
@@ -289,7 +289,7 @@ public:
     void free();
 };
 
-class G2D_SFX{
+class G2D_Sound{
     friend class G2D_Engine;
 
 private:
@@ -297,23 +297,25 @@ private:
     int _channel = -1;
 
     int _x, _y = 0;
-    bool _sound_2d;
+    bool _2d_effect;
 
 public:
-    G2D_SFX(const char *path);
-    ~G2D_SFX();
+    G2D_Sound(const char *path);
+    ~G2D_Sound();
 
     void setChannel(int channel);
     int getChannel();
 
     int play(int repeat_times = 0, int limit_ms = -1);
 
-    void sound2D(bool state);
     void setPosition(int x, int y);
+    void setPosition(G2D_Point point);
     void setX(int x);
     void setY(int y);
     int getX();
     int getY();
+
+    void disable2DEffect();
 
     void setVolume(int volume);
     int getVolume();
