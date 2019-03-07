@@ -1,5 +1,5 @@
 ![Logo](https://github.com/lincolncpp/grape2d/blob/master/logo.png)
-# Grape2D
+
 2D game engine for Linux and Windows (MingW) utilizing SDL2/C++
 
 ## Getting started
