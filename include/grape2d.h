@@ -8,6 +8,16 @@
 
 #include <string>
 
+// Windows support to args
+#ifdef _WIN32
+    #ifndef _vscprintf
+        int _vscprintf_so(const char * format, va_list pargs);
+    #endif
+    #ifndef vasprintf
+        int vasprintf(char **strp, const char *fmt, va_list ap);
+    #endif
+#endif
+
 #define G2D_MIN_CHANNEL 2
 #define G2D_MAX_CHANNEL 10000
 
@@ -21,7 +31,6 @@ class G2D_Font;
 class G2D_Text;
 class G2D_Music;
 class G2D_Sound;
-
 
 // G2D Color struct
 struct G2D_Color{
@@ -321,8 +330,6 @@ public:
     int getVolume();
 
     void free();
-
 };
-
 
 #endif

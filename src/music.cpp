@@ -5,6 +5,10 @@
 
 #include <string>
 
+#ifdef _WIN32
+    #include <math.h>
+#endif
+
 #include "../include/grape2d.h"
 
 G2D_Music *G2D_Music::_playing_now = nullptr;

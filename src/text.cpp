@@ -17,7 +17,6 @@ G2D_Text::G2D_Text(G2D_Font *font, const char *text, ...) {
     va_end(args);
 
     _text = text;
-    _color = {0, 0, 0, 255};
 
     reloadTexture();
 }

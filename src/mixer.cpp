@@ -5,6 +5,10 @@
 
 #include <string>
 
+#ifdef _WIN32
+    #include <math.h>
+#endif
+
 #include "../include/grape2d.h"
 
 void G2D_Engine::G2D_Mixer::setChannelVolume(int volume, int channel){

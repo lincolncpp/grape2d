@@ -5,6 +5,10 @@
 
 #include <string>
 
+#ifdef _WIN32
+    #include <math.h>
+#endif
+
 #include "../include/grape2d.h"
 
 G2D_Sound::G2D_Sound(const char *path) {
