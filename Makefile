@@ -1,7 +1,6 @@
 # Makefile for Linux and Windows (MingW)
-PREFIX=/usr/local
 CC=g++
-CFLAGS=-I. -Wall -std=c++11
+CFLAGS=-Wall -std=c++11
 LIBNAME=libgrape2d.a
 INCLUDE=grape2d.h
 
@@ -11,6 +10,7 @@ ifeq ($(OS), Windows_NT)
 	PREFIX=$(LOCALAPPDATA)\grape2d
 else
 	PLATFORM=$(shell uname -s)
+	PREFIX=/usr/local
 endif
 
 SRC=$(wildcard src/*.cpp)
