@@ -12,7 +12,7 @@ Before you use, you will need to install the following libraries
 - SDL2_mixer
 
 ### Installing
-To install you will need to download the source code and build using the make command
+To install you will need to download the source code and build it using the make command
 ```
 make
 ```
