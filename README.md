@@ -32,5 +32,10 @@ make install
 ## Running the tests
 There is a Makefile in each [test folder](https://github.com/lincolncpp/grape2d/tree/master/test/), you just need to execute the make command and run the generated file.
 
+## Authors
+- **Fernando Lincoln** - [lincolncpp](https://github.com/lincolncpp)
+
+See also the list of [contributors](https://github.com/lincolncpp/grape2d/graphs/contributors) who participated in this project.
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/lincolncpp/grape2d/blob/master/LICENSE) file for details
