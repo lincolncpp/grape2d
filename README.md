@@ -38,8 +38,17 @@ For the second option, do the following (after you have already built)
 make install
 ```
 
-## Running the tests
-There is a Makefile in each [test folder](https://github.com/lincolncpp/grape2d/tree/master/test/), you just need to execute the make command and run the generated file.
+## Example codes
+- [`texture`](https://github.com/lincolncpp/grape2d/tree/master/test/texture) — Shows a simple texture on the screen
+- [`audio`](https://github.com/lincolncpp/grape2d/tree/master/test/audio) — Plays music and sound with 2D ambient effect
+
+### Running
+
+To run any example code, first use the make command in their respective folder to build it
+```
+make
+```
+And then, run the generated file
 
 ## Authors
 - **Fernando Lincoln** - [lincolncpp](https://github.com/lincolncpp)
