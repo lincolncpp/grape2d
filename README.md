@@ -10,9 +10,8 @@
 Grape2D is an open-source 2D game engine with focus in performance and simplicity written in C++. It supports Linux and Windows and interacts with hardware using [SDL](https://www.libsdl.org/)
 
 ## Getting started
-If you want to compile it in Windows, you will need to install [MingW](http://www.mingw.org/)
-
-You can do the following instructions both on Windows and Linux.
+If you want to compile it in Windows, you will need to install [MingW](http://www.mingw.org/).
+The instructions below works both on Windows and Linux.
 
 ### Prerequisites
 First of all, you must to install the following libraries
