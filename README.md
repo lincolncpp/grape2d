@@ -33,7 +33,7 @@ make
 ### Installing
 You can install it from [release version](https://github.com/lincolncpp/grape2d/releases) or from source code.
 
-For the second option, do the following (after you have already built)
+For the second option, use the make command (after you have already built)
 ```
 make install
 ```
