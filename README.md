@@ -1,5 +1,6 @@
 ![Logo](https://raw.githubusercontent.com/lincolncpp/grape2d/master/logo.png)
 
+[![release](https://img.shields.io/github/release-pre/lincolncpp/grape2d.svg)](https://github.com/lincolncpp/grape2d/releases)
 ![platform](https://img.shields.io/badge/platform-linux%20|%20mingw-blue.svg?style=flat)
 ![issues open](https://img.shields.io/github/issues/lincolncpp/grape2d.svg)
 ![pull request](https://img.shields.io/github/issues-pr/lincolncpp/grape2d.svg)
@@ -10,7 +11,7 @@
 2D game engine for Linux and Windows (MingW) utilizing SDL2/C++
 
 ## Getting started
-You can install, uninstall and build from source code directly from the Makefile.
+You can install, uninstall and build from source code directly from the Makefile
 
 ### Prerequisites
 Before you use, you will need to install the following libraries
@@ -20,7 +21,9 @@ Before you use, you will need to install the following libraries
 - SDL2_mixer
 
 ### Installing
-To install you will need to download the source code and build it using the make command
+To install you can download the [release](https://github.com/lincolncpp/grape2d/releases) version and install it by the install.sh
+
+You can too build and install from source code using the make command. First, to build use
 ```
 make
 ```
