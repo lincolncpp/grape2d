@@ -72,6 +72,8 @@ struct G2D_Event{
     G2D_MouseState mouse_state;
     int mouse_x;
     int mouse_y;
+    int mouse_x_relative;
+    int mouse_y_relative;
 
     const Uint8* key_state;
 };
@@ -114,17 +116,18 @@ private:
     private:
         int _x, _y = 0;
 
-        int getDrawXAdd();
-        int getDrawYAdd();
-
     public:
         G2D_Camera();
 
-        void setPosition(int x, int y);
-        void setX(int x);
-        void setY(int y);
-        int getX();
-        int getY();
+        void setCenterPosition(int x, int y);
+        void setCenterPosition(G2D_Point point);
+        void setCenterX(int x);
+        void setCenterY(int y);
+        int getCenterX();
+        int getCenterY();
+
+        int getCornerX();
+        int getCornerY();
 
     };
 
@@ -199,6 +202,7 @@ private:
     int _height;
 
     G2D_Texture(G2D_Font *font, const char *text, G2D_Color color);
+    void _render(bool absolute, int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
 
 public:
     G2D_Texture(const char *path);
@@ -212,6 +216,7 @@ public:
     void setAlpha(Uint8 alpha);
 
     void render(int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
+    void renderHUD(int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
 
     void setSize(int width, int height);
     int getSrcWidth();
@@ -264,6 +269,7 @@ public:
 
 
     void render(int x, int y);
+    void renderHUD(int x, int y);
 };
 
 class G2D_Music{

@@ -21,8 +21,8 @@ void G2D_Engine::G2D_Audio::update() {
             if (Mix_Playing(i)) {
                 int sound_x = _sound[i]->getX();
                 int sound_y = _sound[i]->getY();
-                int cam_x = G2D_Engine::instance->camera->getX();
-                int cam_y = G2D_Engine::instance->camera->getY();
+                int cam_x = G2D_Engine::instance->camera->getCenterX();
+                int cam_y = G2D_Engine::instance->camera->getCenterY();
 
 
                 double a = sound_x - cam_x;

@@ -85,11 +85,16 @@ void G2D_Texture::setAlpha(Uint8 alpha) {
     SDL_SetTextureAlphaMod(_texture, alpha);
 }
 
-void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
+void G2D_Texture::_render(bool absolute, int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
     SDL_Rect rect = {x, y, _width, _height};
     SDL_Rect *clip2 = nullptr;
     SDL_Point *center2 = nullptr;
     SDL_RendererFlip flip = SDL_FLIP_NONE;
+
+    if (!absolute){
+        rect.x = x-G2D_Engine::instance->camera->getCornerX();
+        rect.y = y-G2D_Engine::instance->camera->getCornerY();
+    }
 
     if (clip != nullptr){
         if (_src_width == _width && _src_height == _height) {
@@ -123,6 +128,13 @@ void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *
     SDL_RenderCopyEx(G2D_Engine::instance->_renderer, _texture, clip2, &rect, angle, center2, flip);
 }
 
+void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
+    _render(false, x, y, clip, angle, center, flip_horizontal, flip_vertical);
+}
+
+void G2D_Texture::renderHUD(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
+    _render(true, x, y, clip, angle, center, flip_horizontal, flip_vertical);
+}
 
 void G2D_Texture::setSize(int width, int height) {
     _width = width;

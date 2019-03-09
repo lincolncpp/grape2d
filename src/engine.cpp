@@ -122,6 +122,8 @@ G2D_Event G2D_Engine::convertSDLEventtoG2DEvent(SDL_Event e) {
 
     // Setting mouse x, y
     SDL_GetMouseState(&ge.mouse_x, &ge.mouse_y);
+    ge.mouse_x_relative = ge.mouse_x+G2D_Engine::instance->camera->getCornerX();
+    ge.mouse_y_relative = ge.mouse_y+G2D_Engine::instance->camera->getCornerY();
 
     // Setting mouse state
     if (e.type == SDL_MOUSEMOTION)          ge.mouse_state = G2D_MOUSEMOVE;
