@@ -9,6 +9,7 @@
 
 G2D_Engine *G2D_Engine::instance = nullptr;
 
+
 G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uint32 SDL_flags) {
     _debug = debug;
 
@@ -117,22 +118,34 @@ int G2D_Engine::getFPS() {
     return _real_fps;
 }
 
-G2D_Event G2D_Engine::convertSDLEventtoG2DEvent(SDL_Event e) {
-    G2D_Event ge = {};
+G2D_Event G2D_Engine::createG2D_Event(SDL_Event e) {
+    G2D_Event e_ = {};
 
-    // Setting mouse x, y
-    SDL_GetMouseState(&ge.mouse_x, &ge.mouse_y);
-    ge.mouse_x_relative = ge.mouse_x+G2D_Engine::instance->camera->getCornerX();
-    ge.mouse_y_relative = ge.mouse_y+G2D_Engine::instance->camera->getCornerY();
+    SDL_GetMouseState(&e_.mouse.x, &e_.mouse.y);
+    e_.mouse.x_rel = e_.mouse.x+G2D_Engine::instance->camera->getCornerX();
+    e_.mouse.y_rel = e_.mouse.y+G2D_Engine::instance->camera->getCornerY();
 
-    // Setting mouse state
-    if (e.type == SDL_MOUSEMOTION)          ge.mouse_state = G2D_MOUSEMOVE;
-    else if (e.type == SDL_MOUSEBUTTONDOWN) ge.mouse_state = G2D_MOUSEDOWN;
-    else if (e.type == SDL_MOUSEBUTTONUP)   ge.mouse_state = G2D_MOUSEUP;
+    if (e.type == SDL_MOUSEMOTION){
+        e_.type = G2D_EVENTTYPE_MOUSEMOVE;
+    }
+    else if (e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP){
+        e_.type = (e.type == SDL_MOUSEBUTTONDOWN)?G2D_EVENTTYPE_MOUSEDOWN:G2D_EVENTTYPE_MOUSEUP;
 
-    ge.key_state = SDL_GetKeyboardState(nullptr);
+        if (e.button.button == SDL_BUTTON_LEFT) e_.mouse.button = G2D_MOUSEBUTTON_LEFT;
+        else if (e.button.button == SDL_BUTTON_MIDDLE) e_.mouse.button = G2D_MOUSEBUTTON_MIDDLE;
+        else if (e.button.button == SDL_BUTTON_RIGHT) e_.mouse.button = G2D_MOUSEBUTTON_RIGHT;
+    }
+    else if (e.type == SDL_MOUSEWHEEL){
+        e_.type = G2D_EVENTTYPE_MOUSEWHEEL;
+        e_.mouse.wheel = (Uint8)e.wheel.y;
+    }
+    else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
+        e_.type = e.type == SDL_KEYDOWN?G2D_EVENTTYPE_KEYDOWN:G2D_EVENTTYPE_KEYUP;
 
-    return ge;
+        e_.key.keycode = (G2D_Keycode)e.key.keysym.sym;
+    }
+
+    return e_;
 }
 
 void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*render)()) {
@@ -161,7 +174,7 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*re
             }
 
             if (event != nullptr){
-                event(convertSDLEventtoG2DEvent(e));
+                event(createG2D_Event(e));
             }
         }
 
