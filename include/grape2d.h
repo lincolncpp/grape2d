@@ -7,6 +7,7 @@
 #include "SDL2/SDL_mixer.h"
 
 #include <string>
+#include <vector>
 
 // Windows support to args
 #ifdef _WIN32
@@ -21,7 +22,7 @@
 #define G2D_MIN_CHANNEL 2
 #define G2D_MAX_CHANNEL 10000
 
-#define G2D_DEFAULT_AUDIBLE_RADIUS 1000
+#define G2D_DEFAULT_MAX_SOUND_DISTANCE 1000
 
 #define PI 3.14159265
 
@@ -31,6 +32,7 @@ class G2D_Font;
 class G2D_Text;
 class G2D_Music;
 class G2D_Sound;
+class G2D_Container;
 
 // G2D Keyboard Keys
 enum G2D_Keycode{
@@ -341,12 +343,23 @@ class G2D_Engine{
     friend class G2D_Music;
     friend class G2D_Text;
     friend class G2D_Font;
+    friend class G2D_Container;
 
 private:
     static G2D_Engine *instance;
 
     // Mixer
     class G2D_Mixer{
+        friend class G2D_Engine;
+        friend class G2D_Sound;
+    private:
+        int _max_sound_distance = G2D_DEFAULT_MAX_SOUND_DISTANCE;
+
+        G2D_Sound *_sound[G2D_MAX_CHANNEL] = {};
+
+        void add(G2D_Sound *sound, int channel);
+        void update();
+
     public:
         void setChannelVolume(int volume, int channel = -1);
         int getChannelVolume(int channel = -1);
@@ -364,6 +377,9 @@ private:
         void setDistance(int channel, Uint8 distance);
         void setPosition(int channel, Sint16 angle, Uint8 distance);
         void removeEffects(int channel);
+
+        void setMaxSoundDistance(int radius);
+        int getMaxSoundDistance();
     };
 
     // Camera
@@ -388,24 +404,6 @@ private:
 
     };
 
-    // Audio effect
-    class G2D_Audio{
-        friend class G2D_Engine;
-        friend class G2D_Sound;
-
-    private:
-        int _audible_radius = G2D_DEFAULT_AUDIBLE_RADIUS;
-
-        G2D_Sound *_sound[G2D_MAX_CHANNEL] = {};
-
-        void add(G2D_Sound *sound, int channel);
-        void update();
-
-    public:
-        void setAudibleRadius(int radius);
-        int getAudibleRadius();
-    };
-
     // Engine
     SDL_Renderer* _renderer = nullptr;
 
@@ -417,19 +415,23 @@ private:
     // FPS
     int _real_fps = 0;
 
+    // Containers
+    std::vector<G2D_Container*> containers;
+
     // Error
-    bool _debug = false;
-    std::string _error = "";
-    bool _has_error = false;
+    bool _debug         = false;
+    std::string _error  = "";
+    bool _has_error     = false;
     void setError(const char *text, ...);
 
     // SDL_Event to G2D_Event
-    G2D_Event createG2D_Event(SDL_Event e);
+    G2D_Event convertEvent(SDL_Event e);
+
+    void updateContainerZIndex();
 
 public:
     G2D_Mixer *mixer = nullptr;
     G2D_Camera *camera = nullptr;
-    G2D_Audio *audio = nullptr;
 
     G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();
@@ -442,7 +444,9 @@ public:
 
     int getFPS();
 
-    void start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*render)());
+    void attachContainer(G2D_Container *container);
+
+    void run();
 };
 
 
@@ -593,6 +597,49 @@ public:
     int getVolume();
 
     void free();
+};
+
+class G2D_Container{
+    friend class G2D_Engine;
+
+private:
+    bool _visible = true;
+
+    int _zindex = 0;
+
+    void render();
+    void update(int frame);
+
+    struct G2D_Callback{
+        friend class G2D_Engine;
+
+    private:
+        void (*i0Rendering)() = nullptr;
+        void (*i1Rendering)() = nullptr;
+        void (*i0Updating)() = nullptr;
+        void (*i0UpdatingArg)(int) = nullptr;
+        void (*i1Updating)() = nullptr;
+        void (*i1UpdatingArg)(int) = nullptr;
+        void (*onEvent)(G2D_Event) = nullptr;
+
+    public:
+        void setRenderCallback(void (*function)(), int index = 0);
+        void setUpdateCallback(void (*function)(int), int index = 0);
+        void setUpdateCallback(void (*function)(), int index = 0);
+        void setEventCallback(void (*function)(G2D_Event));
+    };
+
+public:
+    G2D_Container();
+    ~G2D_Container();
+
+    G2D_Callback callback = {};
+
+    void setZIndex(int value);
+    int getZIndex();
+
+    void hide();
+    void show();
 };
 
 #endif

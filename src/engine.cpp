@@ -4,14 +4,16 @@
 #include "SDL2/SDL_mixer.h"
 
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "../include/grape2d.h"
 
 G2D_Engine *G2D_Engine::instance = nullptr;
 
-
 G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uint32 SDL_flags) {
     _debug = debug;
+
 
     // Initialize SDL
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -59,8 +61,6 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uin
                             Mix_AllocateChannels(100);
 
                             camera = new G2D_Camera();
-
-                            audio = new G2D_Audio();
                         }
                     }
                 }
@@ -75,6 +75,9 @@ G2D_Engine::~G2D_Engine() {
 
     _window = nullptr;
     _renderer = nullptr;
+
+    delete mixer;
+    delete camera;
 
     IMG_Quit();
     SDL_Quit();
@@ -118,7 +121,7 @@ int G2D_Engine::getFPS() {
     return _real_fps;
 }
 
-G2D_Event G2D_Engine::createG2D_Event(SDL_Event e) {
+G2D_Event G2D_Engine::convertEvent(SDL_Event e) {
     G2D_Event e_ = {};
 
     SDL_GetMouseState(&e_.mouse.x, &e_.mouse.y);
@@ -148,9 +151,21 @@ G2D_Event G2D_Engine::createG2D_Event(SDL_Event e) {
     return e_;
 }
 
-void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*render)()) {
+void G2D_Engine::attachContainer(G2D_Container *container) {
+    containers.push_back(container);
+    updateContainerZIndex();
+}
+
+
+void G2D_Engine::updateContainerZIndex() {
+    auto compare = [](const G2D_Container *a, const G2D_Container *b) -> bool{
+        return a->_zindex < b->_zindex;
+    };
+    sort(containers.begin(), containers.end(), compare);
+}
+
+void G2D_Engine::run() {
     if (_has_error) return;
-    if (render == nullptr) return;
 
     bool quit = false;
     SDL_Event e;
@@ -164,7 +179,7 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*re
 
         // Sound effect update (Ambient 2D)
         if (framei % 20 == 0){
-            audio->update();
+            mixer->update();
         }
 
         // Input handle event
@@ -173,19 +188,45 @@ void G2D_Engine::start(void (*event)(G2D_Event), void (*loop)(Uint32), void (*re
                 quit = true;
             }
 
-            if (event != nullptr){
-                event(createG2D_Event(e));
+            for (auto container : containers){
+                if (container->callback.onEvent != nullptr){
+                    container->callback.onEvent(convertEvent(e));
+                }
             }
         }
 
         // Logic game loop
-        if (loop != nullptr){
-            loop(framei);
+        for (auto container : containers){
+            if (container->_visible){
+                if (container->callback.i0UpdatingArg != nullptr){
+                    container->callback.i0UpdatingArg(framei);
+                }
+                else if (container->callback.i0Updating != nullptr){
+                    container->callback.i0Updating();
+                }
+                container->update(framei);
+                if (container->callback.i1UpdatingArg != nullptr){
+                    container->callback.i1UpdatingArg(framei);
+                }
+                else if (container->callback.i1Updating != nullptr){
+                    container->callback.i1Updating();
+                }
+            }
         }
 
         // Render
         SDL_RenderClear(_renderer);
-        render();
+        for (auto container : containers){
+            if (container->_visible) {
+                if (container->callback.i0Rendering != nullptr){
+                    container->callback.i0Rendering();
+                }
+                container->render();
+                if (container->callback.i1Rendering != nullptr){
+                    container->callback.i1Rendering();
+                }
+            }
+        }
         SDL_RenderPresent(_renderer);
 
         // FPS count

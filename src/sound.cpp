@@ -37,9 +37,7 @@ int G2D_Sound::play(int repeat_times, int limit_ms) {
     if (channel == -1){
         printf("Error on playing sound. %s\n", Mix_GetError());
     }
-    else{
-        if (_2d_effect) G2D_Engine::instance->audio->add(this, channel);
-    }
+    G2D_Engine::instance->mixer->add(this, channel);
 
     return channel;
 }
