@@ -152,8 +152,10 @@ G2D_Event G2D_Engine::convertEvent(SDL_Event e) {
 }
 
 void G2D_Engine::attachContainer(G2D_Container *container) {
-    containers.push_back(container);
-    updateContainerZIndex();
+    if (_containers.empty() || find(_containers.begin(), _containers.end(), container) == _containers.end()) {
+        _containers.push_back(container);
+        updateContainerZIndex();
+    }
 }
 
 
@@ -161,7 +163,7 @@ void G2D_Engine::updateContainerZIndex() {
     auto compare = [](const G2D_Container *a, const G2D_Container *b) -> bool{
         return a->_zindex < b->_zindex;
     };
-    sort(containers.begin(), containers.end(), compare);
+    sort(_containers.begin(), _containers.end(), compare);
 }
 
 void G2D_Engine::run() {
@@ -188,15 +190,15 @@ void G2D_Engine::run() {
                 quit = true;
             }
 
-            for (auto container : containers){
-                if (container->callback.onEvent != nullptr){
-                    container->callback.onEvent(convertEvent(e));
+            for (auto container : _containers){
+                if (container->callback.i0onEvent != nullptr){
+                    container->callback.i0onEvent(convertEvent(e));
                 }
             }
         }
 
         // Logic game loop
-        for (auto container : containers){
+        for (auto container : _containers){
             if (container->_visible){
                 if (container->callback.i0UpdatingArg != nullptr){
                     container->callback.i0UpdatingArg(framei);
@@ -216,7 +218,7 @@ void G2D_Engine::run() {
 
         // Render
         SDL_RenderClear(_renderer);
-        for (auto container : containers){
+        for (auto container : _containers){
             if (container->_visible) {
                 if (container->callback.i0Rendering != nullptr){
                     container->callback.i0Rendering();

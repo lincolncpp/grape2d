@@ -33,6 +33,7 @@ class G2D_Text;
 class G2D_Music;
 class G2D_Sound;
 class G2D_Container;
+class G2D_Sprite;
 
 // G2D Keyboard Keys
 enum G2D_Keycode{
@@ -416,7 +417,7 @@ private:
     int _real_fps = 0;
 
     // Containers
-    std::vector<G2D_Container*> containers;
+    std::vector<G2D_Container*> _containers = {};
 
     // Error
     bool _debug         = false;
@@ -601,14 +602,19 @@ public:
 
 class G2D_Container{
     friend class G2D_Engine;
+    friend class G2D_Sprite;
 
 private:
     bool _visible = true;
 
     int _zindex = 0;
 
+    std::vector<G2D_Sprite*> _elements = {};
+
     void render();
     void update(int frame);
+
+    void updateSpriteZIndex();
 
     struct G2D_Callback{
         friend class G2D_Engine;
@@ -620,13 +626,13 @@ private:
         void (*i0UpdatingArg)(int) = nullptr;
         void (*i1Updating)() = nullptr;
         void (*i1UpdatingArg)(int) = nullptr;
-        void (*onEvent)(G2D_Event) = nullptr;
+        void (*i0onEvent)(G2D_Event) = nullptr;
 
     public:
-        void setRenderCallback(void (*function)(), int index = 0);
-        void setUpdateCallback(void (*function)(int), int index = 0);
-        void setUpdateCallback(void (*function)(), int index = 0);
-        void setEventCallback(void (*function)(G2D_Event));
+        void onRender(void (*function)(), int index = 0);
+        void onUpdate(void (*function)(int), int index = 0);
+        void onUpdate(void (*function)(), int index = 0);
+        void onEvent(void (*function)(G2D_Event));
     };
 
 public:
@@ -638,8 +644,44 @@ public:
     void setZIndex(int value);
     int getZIndex();
 
+    void attach(G2D_Sprite *sprite  );
+
     void hide();
     void show();
+};
+
+class G2D_Sprite{
+    friend class G2D_Container;
+
+private:
+    G2D_Texture *_texture = nullptr;
+
+    G2D_Container *_container_owner = nullptr;
+
+    int _sprite_width = 0;
+    int _sprite_height = 0;
+    G2D_Point _position = {0, 0};
+
+    int _zindex = 0;
+
+public:
+    G2D_Sprite(const char *path, int sprite_width = 0, int sprite_height = 0);
+    G2D_Sprite(G2D_Texture *texture, int sprite_width = 0, int sprite_height = 0);
+    ~G2D_Sprite();
+
+    void setPosition(int x, int y);
+    void setPosition(G2D_Point point);
+    void setX(int x);
+    int getX();
+    void setY(int y);
+    int getY();
+
+    void setZIndex(int value);
+    int getZIndex();
+
+    void render();
+
+    G2D_Texture *getTexture();
 };
 
 #endif
