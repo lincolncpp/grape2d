@@ -32,8 +32,6 @@ void G2D_Sprite::construct(int sprite_width, int sprite_height) {
 
 void G2D_Sprite::update(uint32_t tick) {
     if (_is_animating){
-        int frame = _tick_animate;
-
         int frame_index = (int)((float)(tick-_tick_animate)/(_time)*((int)_frames->size()));
         frame_index = frame_index > (int)_frames->size()-1?(int)_frames->size()-1:frame_index;
 
