@@ -32,7 +32,7 @@ int G2D_Sound::getChannel() {
     return _channel;
 }
 
-int G2D_Sound::play(int repeat_times, int limit_ms) {
+int G2D_Sound::play(int repeat_times, int32_t limit_ms) {
     int channel = Mix_PlayChannelTimed(_channel, _sound, repeat_times, limit_ms);
     if (channel == -1){
         printf("Error on playing sound. %s\n", Mix_GetError());
@@ -43,37 +43,35 @@ int G2D_Sound::play(int repeat_times, int limit_ms) {
 }
 
 void G2D_Sound::setPosition(int x, int y) {
-    _x = x;
-    _y = y;
+    _position.x = x;
+    _position.y = y;
 
     _2d_effect = true;
 }
 
 void G2D_Sound::setPosition(G2D_Point point) {
-    _x = point.x;
-    _y = point.y;
-
+    _position = point;
     _2d_effect = true;
 }
 
 void G2D_Sound::setX(int x) {
-    _x = x;
+    _position.x = x;
 
     _2d_effect = true;
 }
 
 void G2D_Sound::setY(int y) {
-    _y = y;
+    _position.y = y;
 
     _2d_effect = true;
 }
 
 int G2D_Sound::getX() {
-    return _x;
+    return _position.x;
 }
 
 int G2D_Sound::getY() {
-    return _y;
+    return _position.y;
 }
 
 void G2D_Sound::disable2DEffect() {
@@ -98,6 +96,6 @@ int G2D_Sound::getVolume() {
 void G2D_Sound::free() {
     if (_sound != nullptr){
         Mix_FreeChunk(_sound);
-        _sound = nullptr;
+        delete _sound;
     }
 }

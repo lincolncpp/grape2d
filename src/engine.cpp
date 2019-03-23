@@ -11,7 +11,7 @@
 
 G2D_Engine *G2D_Engine::instance = nullptr;
 
-G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, Uint32 SDL_flags) {
+G2D_Engine::G2D_Engine(uint16_t width, uint16_t height, const char *title, bool debug, uint32_t SDL_flags) {
     _debug = debug;
 
 
@@ -104,8 +104,10 @@ void G2D_Engine::setError(const char *text, ...) {
     _error = msg;
     _has_error = true;
 
+    delete msg;
+
     if (_debug){
-        printf("%s\n", msg);
+        printf("%s\n", _error.c_str());
     }
 }
 
@@ -172,16 +174,20 @@ void G2D_Engine::run() {
     bool quit = false;
     SDL_Event e;
 
-    Uint32 tick = SDL_GetTicks();
-    int frame = 0;
-    Uint32 framei = 0;
+    uint32_t fps_tick = SDL_GetTicks();
+    uint16_t frame = 0;
+    uint32_t main_tick;
+    uint32_t frame_total = 0;
 
     // Main loop
     while (!quit) {
+        main_tick = SDL_GetTicks();
 
         // Sound effect update (Ambient 2D)
-        if (framei % 20 == 0){
+        if (frame_total % 20 == 0){
             mixer->update();
+
+            //SDL_Delay(10);
         }
 
         // Input handle event
@@ -191,52 +197,41 @@ void G2D_Engine::run() {
             }
 
             for (auto container : _containers){
-                if (container->callback.i0onEvent != nullptr){
-                    container->callback.i0onEvent(convertEvent(e));
+                if (container->callback.onEventFunction != nullptr){
+                    container->callback.onEventFunction(convertEvent(e));
                 }
             }
         }
 
+
         // Logic game loop
         for (auto container : _containers){
             if (container->_visible){
-                if (container->callback.i0UpdatingArg != nullptr){
-                    container->callback.i0UpdatingArg(framei);
+                if (container->callback.onUpdateFunction != nullptr){
+                    container->callback.onUpdateFunction();
                 }
-                else if (container->callback.i0Updating != nullptr){
-                    container->callback.i0Updating();
-                }
-                container->update(framei);
-                if (container->callback.i1UpdatingArg != nullptr){
-                    container->callback.i1UpdatingArg(framei);
-                }
-                else if (container->callback.i1Updating != nullptr){
-                    container->callback.i1Updating();
-                }
+                container->update(main_tick);
             }
         }
+
 
         // Render
         SDL_RenderClear(_renderer);
         for (auto container : _containers){
             if (container->_visible) {
-                if (container->callback.i0Rendering != nullptr){
-                    container->callback.i0Rendering();
+                if (container->callback.onRenderFunction != nullptr){
+                    container->callback.onRenderFunction();
                 }
-                container->render();
-                if (container->callback.i1Rendering != nullptr){
-                    container->callback.i1Rendering();
-                }
+                container->render(); // memory problem here
             }
         }
         SDL_RenderPresent(_renderer);
 
         // FPS count
         frame++;
-        framei++;
-        Uint32 current_tick = SDL_GetTicks();
-        if (current_tick > tick+1000){
-            tick = current_tick;
+        frame_total++;
+        if (main_tick > fps_tick+1000){
+            fps_tick = main_tick;
             _real_fps = frame;
 
             frame = 0;

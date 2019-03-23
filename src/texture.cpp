@@ -23,15 +23,15 @@ G2D_Texture::G2D_Texture(const char *path) {
     }
 
     // Getting texture dimensions
-    SDL_QueryTexture(_texture, nullptr, nullptr, &_src_width, &_src_height);
+    int real_width, real_height;
+    SDL_QueryTexture(_texture, nullptr, nullptr, &real_width, &real_height);
 
-    _width = _src_width;
-    _height = _src_height;
+    _width = _src_width = (uint16_t)real_width;
+    _height = _src_height = (uint16_t)real_height;
 }
 
 G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
     free();
-
 
     SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
 
@@ -47,8 +47,8 @@ G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
 
         }
         else{
-            _src_width = _width = textSurface->w;
-            _src_height = _height = textSurface->h;
+            _src_width = _width = (uint16_t)textSurface->w;
+            _src_height = _height = (uint16_t)textSurface->h;
         }
 
         SDL_FreeSurface(textSurface);
@@ -67,7 +67,7 @@ void G2D_Texture::setColor(G2D_Color color) {
     setAlpha(color.a);
 }
 
-void G2D_Texture::setColor(Uint8 red, Uint8 green, Uint8 blue) {
+void G2D_Texture::setColor(uint8_t red, uint8_t green, uint8_t blue) {
     SDL_SetTextureColorMod(_texture, red, green, blue);
 }
 
@@ -81,17 +81,21 @@ void G2D_Texture::setBlendMode(G2D_BlendMode blendMode) {
     SDL_SetTextureBlendMode(_texture, blend);
 }
 
-void G2D_Texture::setAlpha(Uint8 alpha) {
+void G2D_Texture::setAlpha(uint8_t alpha) {
     SDL_SetTextureAlphaMod(_texture, alpha);
 }
 
-void G2D_Texture::_render(bool absolute, int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
+void G2D_Texture::setReferential(G2D_Referential referential) {
+    _referential = referential;
+}
+
+void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
     SDL_Rect rect = {x, y, _width, _height};
-    SDL_Rect *clip2 = nullptr;
-    SDL_Point *center2 = nullptr;
+    SDL_Rect clip2 = {0, 0, _width, _height};
+    SDL_Point center2 = {0, 0};
     SDL_RendererFlip flip = SDL_FLIP_NONE;
 
-    if (!absolute){
+    if (_referential == G2D_REFERENTIAL_RELATIVE){
         rect.x = x-G2D_Engine::instance->camera->getCornerX();
         rect.y = y-G2D_Engine::instance->camera->getCornerY();
     }
@@ -102,17 +106,15 @@ void G2D_Texture::_render(bool absolute, int x, int y, G2D_Rect *clip, double an
             rect.h = clip->h;
         }
 
-        clip2 = new SDL_Rect();
-        clip2->x = clip->x;
-        clip2->y = clip->y;
-        clip2->w = clip->w;
-        clip2->h = clip->h;
+        clip2.x = clip->x;
+        clip2.y = clip->y;
+        clip2.w = clip->w;
+        clip2.h = clip->h;
     }
 
     if (center != nullptr){
-        center2 = new SDL_Point();
-        center2->x = center->x;
-        center2->y = center->y;
+        center2.x = center->x;
+        center2.y = center->y;
     }
 
     if (flip_horizontal && flip_vertical){
@@ -125,20 +127,13 @@ void G2D_Texture::_render(bool absolute, int x, int y, G2D_Rect *clip, double an
         flip = SDL_FLIP_VERTICAL;
     }
 
-    SDL_RenderCopyEx(G2D_Engine::instance->_renderer, _texture, clip2, &rect, angle, center2, flip);
+    SDL_RenderCopyEx(G2D_Engine::instance->_renderer, _texture, &clip2, &rect, angle, &center2, flip);
 }
 
-void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
-    _render(false, x, y, clip, angle, center, flip_horizontal, flip_vertical);
-}
-
-void G2D_Texture::renderHUD(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
-    _render(true, x, y, clip, angle, center, flip_horizontal, flip_vertical);
-}
 
 void G2D_Texture::setSize(int width, int height) {
-    _width = width;
-    _height = height;
+    _width = (uint16_t)width;
+    _height = (uint16_t)height;
 }
 
 int G2D_Texture::getSrcWidth() {

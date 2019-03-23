@@ -19,6 +19,8 @@ G2D_Text::G2D_Text(G2D_Font *font, const char *text, ...) {
     _text = text;
 
     reloadTexture();
+
+    delete msg;
 }
 
 G2D_Text::~G2D_Text() {
@@ -31,7 +33,7 @@ void G2D_Text::setColor(G2D_Color color) {
     reloadTexture();
 }
 
-void G2D_Text::setColor(Uint8 red, Uint8 green, Uint8 blue) {
+void G2D_Text::setColor(uint8_t red, uint8_t green, uint8_t blue) {
     _color.r = red;
     _color.g = green;
     _color.b = blue;
@@ -39,12 +41,13 @@ void G2D_Text::setColor(Uint8 red, Uint8 green, Uint8 blue) {
     reloadTexture();
 }
 
-void G2D_Text::setAlpha(Uint8 alpha) {
+void G2D_Text::setAlpha(uint8_t alpha) {
     _color.a = alpha;
     _texture->setAlpha(_color.a);
 }
 
 void G2D_Text::setText(const char *text, ...) {
+
     char *msg = nullptr;
     va_list args;
     va_start(args, text);
@@ -55,6 +58,8 @@ void G2D_Text::setText(const char *text, ...) {
     _text = msg;
 
     reloadTexture();
+
+    delete msg;
 }
 
 void G2D_Text::setFont(G2D_Font *font) {
@@ -63,14 +68,22 @@ void G2D_Text::setFont(G2D_Font *font) {
     reloadTexture();
 }
 
+void G2D_Text::setReferential(G2D_Referential referential) {
+    _referential = referential;
+
+    _texture->setReferential(_referential);
+}
+
 void G2D_Text::render(int x, int y) {
     _texture->render(x, y);
 }
 
-void G2D_Text::renderHUD(int x, int y) {
-    _texture->renderHUD(x, y);
-}
 
 void G2D_Text::reloadTexture() {
+    if (_texture != nullptr){
+        _texture->free();
+        delete _texture;
+    }
     _texture = new G2D_Texture(_font, _text.c_str(), _color);
+    _texture->setReferential(_referential);
 }

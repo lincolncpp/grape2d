@@ -281,12 +281,34 @@ enum G2D_MOUSEBUTTON{
     G2D_MOUSEBUTTON_MIDDLE
 };
 
+enum G2D_BlendMode{
+    G2D_BLENDMODE_NONE,
+    G2D_BLENDMODE_BLEND,
+    G2D_BLENDMODE_ADD,
+    G2D_BLENDMODE_MOD
+};
+
+enum G2D_EventType{
+    G2D_EVENTTYPE_NULL,
+    G2D_EVENTTYPE_MOUSEDOWN,
+    G2D_EVENTTYPE_MOUSEUP,
+    G2D_EVENTTYPE_MOUSEMOVE,
+    G2D_EVENTTYPE_MOUSEWHEEL,
+    G2D_EVENTTYPE_KEYDOWN,
+    G2D_EVENTTYPE_KEYUP
+};
+
+enum G2D_Referential{
+    G2D_REFERENTIAL_ABSOLUTE,
+    G2D_REFERENTIAL_RELATIVE,
+};
+
 // G2D Color struct
 struct G2D_Color{
-    Uint8 r = 0;
-    Uint8 g = 0;
-    Uint8 b = 0;
-    Uint8 a = 255;
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+    uint8_t a = 255;
 };
 
 // G2D Rect struct
@@ -303,27 +325,9 @@ struct G2D_Point{
     int y;
 };
 
-// G2D BlendMode struct
-enum G2D_BlendMode{
-    G2D_BLENDMODE_NONE,
-    G2D_BLENDMODE_BLEND,
-    G2D_BLENDMODE_ADD,
-    G2D_BLENDMODE_MOD
-};
-
-// G2D Event struct
-enum G2D_EventType{
-    G2D_EVENTTYPE_NULL,
-    G2D_EVENTTYPE_MOUSEDOWN,
-    G2D_EVENTTYPE_MOUSEUP,
-    G2D_EVENTTYPE_MOUSEMOVE,
-    G2D_EVENTTYPE_MOUSEWHEEL,
-    G2D_EVENTTYPE_KEYDOWN,
-    G2D_EVENTTYPE_KEYUP
-};
-
 struct G2D_Event{
     G2D_EventType type = G2D_EVENTTYPE_NULL;
+
     struct G2D_MouseEvent{
         int x;
         int y;
@@ -331,8 +335,9 @@ struct G2D_Event{
         int y_rel;
         G2D_MOUSEBUTTON button;
 
-        Sint8 wheel;
+        int8_t wheel;
     } mouse = {};
+
     struct G2D_KeyboardEvent{
         G2D_Keycode keycode;
     } key = {};
@@ -353,7 +358,10 @@ private:
     class G2D_Mixer{
         friend class G2D_Engine;
         friend class G2D_Sound;
+        friend class G2D_Music;
     private:
+        G2D_Music *_playing_music = nullptr;
+
         int _max_sound_distance = G2D_DEFAULT_MAX_SOUND_DISTANCE;
 
         G2D_Sound *_sound[G2D_MAX_CHANNEL] = {};
@@ -362,7 +370,7 @@ private:
         void update();
 
     public:
-        void setChannelVolume(int volume, int channel = -1);
+        void setChannelVolume(int8_t volume, int channel = -1);
         int getChannelVolume(int channel = -1);
 
         void setMaxChannels(int num_channels);
@@ -370,14 +378,15 @@ private:
         void resumeChannel(int channel = -1);
         void pauseChannel(int channel = -1);
         void endChannel(int channel);
-        void endChannelTimed(int channel, int time_ms);
-        void endChannelFadeOut(int channel, int time_ms);
+        void endChannelTimed(int channel, uint32_t time_ms);
+        void endChannelFadeOut(int channel, uint32_t time_ms);
 
-
-        void setPlanning(int channel, Uint8 left, Uint8 right);
-        void setDistance(int channel, Uint8 distance);
-        void setPosition(int channel, Sint16 angle, Uint8 distance);
+        void setPlanning(int channel, uint8_t left, uint8_t right);
+        void setDistance(int channel, uint8_t distance);
+        void setPosition(int channel, int16_t angle, uint8_t distance);
         void removeEffects(int channel);
+
+        G2D_Music *getThePlayingMusic();
 
         void setMaxSoundDistance(int radius);
         int getMaxSoundDistance();
@@ -388,7 +397,7 @@ private:
         friend class G2D_Texture;
 
     private:
-        int _x, _y = 0;
+        G2D_Point _position;
 
     public:
         G2D_Camera();
@@ -410,11 +419,11 @@ private:
 
     // Window
     SDL_Window* _window = nullptr;
-    int _window_width;
-    int _window_height;
+    uint16_t _window_width;
+    uint16_t _window_height;
 
     // FPS
-    int _real_fps = 0;
+    uint16_t _real_fps = 0;
 
     // Containers
     std::vector<G2D_Container*> _containers = {};
@@ -425,16 +434,15 @@ private:
     bool _has_error     = false;
     void setError(const char *text, ...);
 
-    // SDL_Event to G2D_Event
+    // Intern functions
     G2D_Event convertEvent(SDL_Event e);
-
     void updateContainerZIndex();
 
 public:
     G2D_Mixer *mixer = nullptr;
     G2D_Camera *camera = nullptr;
 
-    G2D_Engine(int width, int height, const char *title, bool debug = false, Uint32 SDL_flags = SDL_RENDERER_ACCELERATED);
+    G2D_Engine(uint16_t width, uint16_t height, const char *title, bool debug = false, uint32_t SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();
 
     bool hasError();
@@ -454,17 +462,19 @@ public:
 class G2D_Texture{
     friend class G2D_Text;
     friend class G2D_Engine;
+    friend class G2D_Sprite;
 
 private:
     SDL_Texture *_texture = nullptr;
 
-    int _src_width;
-    int _width;
-    int _src_height;
-    int _height;
+    uint16_t _src_width;
+    uint16_t _width;
+    uint16_t _src_height;
+    uint16_t _height;
+
+    G2D_Referential _referential = G2D_REFERENTIAL_ABSOLUTE;
 
     G2D_Texture(G2D_Font *font, const char *text, G2D_Color color);
-    void _render(bool absolute, int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
 
 public:
     G2D_Texture(const char *path);
@@ -473,12 +483,13 @@ public:
     void free();
 
     void setColor(G2D_Color color);
-    void setColor(Uint8 red, Uint8 green, Uint8 blue);
+    void setColor(uint8_t red, uint8_t green, uint8_t blue);
     void setBlendMode(G2D_BlendMode blendMode);
-    void setAlpha(Uint8 alpha);
+    void setAlpha(uint8_t alpha);
+
+    void setReferential(G2D_Referential referential);
 
     void render(int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
-    void renderHUD(int x, int y, G2D_Rect *clip = nullptr, double angle = 0, G2D_Point *center = nullptr, bool flip_horizontal = false, bool flip_vertical = false);
 
     void setSize(int width, int height);
     int getSrcWidth();
@@ -494,7 +505,7 @@ class G2D_Font{
 private:
     TTF_Font *_font = nullptr;
     std::string _path;
-    int _size;
+    uint16_t _size;
 
     bool loadFont(const char *path, int size);
 
@@ -517,6 +528,8 @@ private:
     std::string _text;
     G2D_Color _color;
 
+    G2D_Referential _referential;
+
     void reloadTexture();
 
 public:
@@ -524,24 +537,23 @@ public:
     ~G2D_Text();
 
     void setColor(G2D_Color color);
-    void setColor(Uint8 red, Uint8 green, Uint8 blue);
-    void setAlpha(Uint8 alpha);
+    void setColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setAlpha(uint8_t alpha);
     void setText(const char *text, ...);
     void setFont(G2D_Font *font);
 
+    void setReferential(G2D_Referential referential);
 
     void render(int x, int y);
-    void renderHUD(int x, int y);
 };
 
 class G2D_Music{
     friend class G2D_Engine;
 
 private:
-    static G2D_Music *_playing_now;
     Mix_Music *_music = nullptr;
 
-    int _volume = 100;
+    uint8_t _volume = 100;
 
     void updateVolume();
 
@@ -550,14 +562,14 @@ public:
     ~G2D_Music();
 
     int play(bool looping = true);
-    int playFadeIn(bool looping = true, int effect_time_ms = 1000);
+    int playFadeIn(bool looping = true, uint32_t effect_time_ms = 1000);
 
     void rewind();
 
     void resume();
     void pause();
     void stop();
-    void stopFadeOut(int effect_time_ms = 1000);
+    void stopFadeOut(uint32_t effect_time_ms = 1000);
 
     void setVolume(int volume);
     int getVolume();
@@ -573,7 +585,7 @@ private:
     Mix_Chunk *_sound = nullptr;
     int _channel = -1;
 
-    int _x, _y = 0;
+    G2D_Point _position = {0};
     bool _2d_effect;
 
 public:
@@ -583,7 +595,7 @@ public:
     void setChannel(int channel);
     int getChannel();
 
-    int play(int repeat_times = 0, int limit_ms = -1);
+    int play(int repeat_times = 0, int32_t limit_ms = 0);
 
     void setPosition(int x, int y);
     void setPosition(G2D_Point point);
@@ -607,12 +619,12 @@ class G2D_Container{
 private:
     bool _visible = true;
 
-    int _zindex = 0;
+    int16_t _zindex = 0;
 
     std::vector<G2D_Sprite*> _elements = {};
 
     void render();
-    void update(int frame);
+    void update(uint32_t frame);
 
     void updateSpriteZIndex();
 
@@ -620,18 +632,13 @@ private:
         friend class G2D_Engine;
 
     private:
-        void (*i0Rendering)() = nullptr;
-        void (*i1Rendering)() = nullptr;
-        void (*i0Updating)() = nullptr;
-        void (*i0UpdatingArg)(int) = nullptr;
-        void (*i1Updating)() = nullptr;
-        void (*i1UpdatingArg)(int) = nullptr;
-        void (*i0onEvent)(G2D_Event) = nullptr;
+        void (*onRenderFunction)() = nullptr;
+        void (*onUpdateFunction)() = nullptr;
+        void (*onEventFunction)(G2D_Event) = nullptr;
 
     public:
-        void onRender(void (*function)(), int index = 0);
-        void onUpdate(void (*function)(int), int index = 0);
-        void onUpdate(void (*function)(), int index = 0);
+        void onRender(void (*function)());
+        void onUpdate(void (*function)());
         void onEvent(void (*function)(G2D_Event));
     };
 
@@ -641,7 +648,7 @@ public:
 
     G2D_Callback callback = {};
 
-    void setZIndex(int value);
+    void setZIndex(int16_t value);
     int getZIndex();
 
     void attach(G2D_Sprite *sprite  );
@@ -655,14 +662,23 @@ class G2D_Sprite{
 
 private:
     G2D_Texture *_texture = nullptr;
-
     G2D_Container *_container_owner = nullptr;
 
-    int _sprite_width = 0;
-    int _sprite_height = 0;
     G2D_Point _position = {0, 0};
 
-    int _zindex = 0;
+    G2D_Rect _clip = {0};
+    uint16_t _current_frame = 0;
+
+    int16_t _zindex = 0;
+
+    // Animate
+    uint32_t _tick_animate = 0;
+    uint32_t _time = 0;
+    bool _is_animating = false;
+    std::vector<int> *_frames = nullptr;
+
+    void construct(int sprite_width, int sprite_height);
+    void update(uint32_t tick);
 
 public:
     G2D_Sprite(const char *path, int sprite_width = 0, int sprite_height = 0);
@@ -675,6 +691,13 @@ public:
     int getX();
     void setY(int y);
     int getY();
+
+    void setReferential(G2D_Referential referential);
+
+    void setFrame(int frame);
+    int getFrame();
+
+    void animate(std::vector<int> frames, uint32_t time, bool force = false);
 
     void setZIndex(int value);
     int getZIndex();

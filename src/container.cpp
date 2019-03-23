@@ -21,10 +21,13 @@ void G2D_Container::render() {
     }
 }
 
-void G2D_Container::update(int frame) {
+void G2D_Container::update(uint32_t tick) {
+    for (auto sprite: _elements){
+        sprite->update(tick);
+    }
 }
 
-void G2D_Container::setZIndex(int value) {
+void G2D_Container::setZIndex(int16_t value) {
     _zindex = value;
     G2D_Engine::instance->updateContainerZIndex();
 }
@@ -42,34 +45,16 @@ void G2D_Container::show() {
 }
 
 void G2D_Container::G2D_Callback::onEvent(void (*function)(G2D_Event)) {
-    i0onEvent = function;
+    onEventFunction = function;
 }
 
-void G2D_Container::G2D_Callback::onUpdate(void (*function)(), int index) {
-    if (index == 0){
-        i0Updating = function;
-    }
-    else{
-        i1Updating = function;
-    }
+void G2D_Container::G2D_Callback::onUpdate(void (*function)()) {
+    onUpdateFunction = function;
 }
 
-void G2D_Container::G2D_Callback::onUpdate(void (*function)(int), int index) {
-    if (index == 0){
-        i0UpdatingArg = function;
-    }
-    else{
-        i1UpdatingArg = function;
-    }
-}
 
-void G2D_Container::G2D_Callback::onRender(void (*function)(), int index) {
-    if (index == 0){
-        i0Rendering = function;
-    }
-    else{
-        i1Rendering = function;
-    }
+void G2D_Container::G2D_Callback::onRender(void (*function)()) {
+    onRenderFunction = function;
 }
 
 void G2D_Container::attach(G2D_Sprite *sprite) {
