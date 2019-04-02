@@ -9,29 +9,33 @@
 #include "../include/grape2d.h"
 
 
-G2D_Sprite::G2D_Sprite(const char *path, int sprite_width, int sprite_height) {
+G2D_Sprite::G2D_Sprite(const char *path, int frames_x, int frames_y) {
     _texture = new G2D_Texture(path);
 
-    construct(sprite_width, sprite_height);
+    construct(frames_x, frames_y);
 }
 
-G2D_Sprite::G2D_Sprite(G2D_Texture *texture, int sprite_width, int sprite_height) {
+G2D_Sprite::G2D_Sprite(G2D_Texture *texture, int frames_x, int frames_y) {
     _texture = texture;
 
-    construct(sprite_width, sprite_height);
+    construct(frames_x, frames_y);
 }
 
-void G2D_Sprite::construct(int sprite_width, int sprite_height) {
+void G2D_Sprite::construct(int frames_x, int frames_y) {
     _texture->setReferential(G2D_REFERENTIAL_RELATIVE);
 
-    _clip = {0, 0,
-             sprite_width>0?sprite_width:_texture->getSrcWidth(),
-             sprite_height>0?sprite_height:_texture->getSrcHeight()
-    };
+    if (frames_x > 0 && frames_y > 0){
+        _clip = {0, 0, _texture->getSrcWidth()/frames_x, _texture->getSrcHeight()/frames_y};
+    }
+    else{
+        _clip = {0, 0, _texture->getSrcWidth(), _texture->getSrcHeight()};
+    }
 }
 
 void G2D_Sprite::update(uint32_t tick) {
     if (_is_animating){
+        int frame = _tick_animate;
+
         int frame_index = (int)((float)(tick-_tick_animate)/(_time)*((int)_frames->size()));
         frame_index = frame_index > (int)_frames->size()-1?(int)_frames->size()-1:frame_index;
 

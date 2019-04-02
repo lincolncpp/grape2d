@@ -227,6 +227,11 @@ void G2D_Engine::run() {
         }
         SDL_RenderPresent(_renderer);
 
+        // Update timers
+        for (auto timer : _timers){
+            timer->update(main_tick);
+        }
+
         // FPS count
         frame++;
         frame_total++;

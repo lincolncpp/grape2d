@@ -34,6 +34,7 @@ class G2D_Music;
 class G2D_Sound;
 class G2D_Container;
 class G2D_Sprite;
+class G2D_Timer;
 
 // G2D Keyboard Keys
 enum G2D_Keycode{
@@ -350,6 +351,7 @@ class G2D_Engine{
     friend class G2D_Text;
     friend class G2D_Font;
     friend class G2D_Container;
+    friend class G2D_Timer;
 
 private:
     static G2D_Engine *instance;
@@ -427,6 +429,9 @@ private:
 
     // Containers
     std::vector<G2D_Container*> _containers = {};
+
+    // Timers
+    std::vector<G2D_Timer*> _timers = {};
 
     // Error
     bool _debug         = false;
@@ -677,12 +682,12 @@ private:
     bool _is_animating = false;
     std::vector<int> *_frames = nullptr;
 
-    void construct(int sprite_width, int sprite_height);
+    void construct(int frames_x, int frames_y);
     void update(uint32_t tick);
 
 public:
-    G2D_Sprite(const char *path, int sprite_width = 0, int sprite_height = 0);
-    G2D_Sprite(G2D_Texture *texture, int sprite_width = 0, int sprite_height = 0);
+    G2D_Sprite(const char *path, int frames_x = 0, int frames_y = 0);
+    G2D_Sprite(G2D_Texture *texture, int frames_x = 0, int frames_y = 0);
     ~G2D_Sprite();
 
     void setPosition(int x, int y);
@@ -705,6 +710,34 @@ public:
     void render();
 
     G2D_Texture *getTexture();
+};
+
+class G2D_Timer{
+private:
+    bool _started = false;
+    bool _paused = false;
+
+    uint32_t _tick_start = 0;
+    uint32_t _tick_pause = 0;
+    uint32_t _limit = 0;
+
+    void (*_callback)() = nullptr;
+public:
+    G2D_Timer(uint32_t limit = 0, void (*callback)() = nullptr);
+    ~G2D_Timer();
+
+    void update(uint32_t engine_tick);
+
+    void start();
+    void pause();
+    void resume();
+    void stop();
+    void restart();
+    void toggle();
+
+    int getTime();
+    bool isPaused();
+    bool isStarted();
 };
 
 #endif
