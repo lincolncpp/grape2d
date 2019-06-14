@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/lincolncpp/grape2d/master/logo.png)
+![Logo](images/logo.png)
 
 [![release](https://img.shields.io/github/release-pre/lincolncpp/grape2d.svg)](https://github.com/lincolncpp/grape2d/releases)
 ![platform](https://img.shields.io/badge/platform-linux%20|%20windows-blue.svg?style=flat)
@@ -8,6 +8,8 @@
 ===
 
 Grape2D is an open-source 2D game engine with focus in performance and simplicity written in C++. It supports Linux and Windows and interacts with hardware using [SDL](https://www.libsdl.org/)
+
+![Logo](images/screenshot.png)
 
 ## Getting started
 If you want to compile it in Windows, you will need to install [MingW](http://www.mingw.org/).
