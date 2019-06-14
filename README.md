@@ -8,6 +8,7 @@
 ===
 
 Grape2D is an open-source 2D game engine with focus in performance and simplicity written in C++. It supports Linux and Windows and interacts with hardware using [SDL](https://www.libsdl.org/)
+
 ![Logo](images/screenshot.png)
 
 ## Getting started
