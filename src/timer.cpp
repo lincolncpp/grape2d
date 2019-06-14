@@ -7,7 +7,7 @@
 
 #include "../include/grape2d.h"
 
-G2D_Timer::G2D_Timer(uint32_t limit, void (*callback)()) {
+G2D_Timer::G2D_Timer(int limit, void (*callback)()) {
     _limit = limit;
     _callback = callback;
 
@@ -22,7 +22,7 @@ G2D_Timer::~G2D_Timer() {
     }
 }
 
-void G2D_Timer::update(uint32_t engine_tick) {
+void G2D_Timer::update(int engine_tick) {
     if (!_paused && _started){
         if (engine_tick >= _tick_start + _limit){
             _tick_start += _limit;

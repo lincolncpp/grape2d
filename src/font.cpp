@@ -9,7 +9,7 @@
 
 G2D_Font::G2D_Font(const char *path, int size) {
     _path = path;
-    _size = (uint16_t)size;
+    _size = size;
 
     loadFont(path, size);
 }

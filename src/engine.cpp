@@ -11,7 +11,7 @@
 
 G2D_Engine *G2D_Engine::instance = nullptr;
 
-G2D_Engine::G2D_Engine(uint16_t width, uint16_t height, const char *title, bool debug, uint32_t SDL_flags) {
+G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, int SDL_flags) {
     _debug = debug;
 
 
@@ -37,7 +37,7 @@ G2D_Engine::G2D_Engine(uint16_t width, uint16_t height, const char *title, bool 
             }
             else {
                 // Creating renderer
-                _renderer = SDL_CreateRenderer(_window, -1, SDL_flags);
+                _renderer = SDL_CreateRenderer(_window, -1, (Uint32)SDL_flags);
 
                 if(_renderer == nullptr){
                     setError("Renderer could not be created! SDL Error: %s", SDL_GetError());
@@ -142,7 +142,7 @@ G2D_Event G2D_Engine::convertEvent(SDL_Event e) {
     }
     else if (e.type == SDL_MOUSEWHEEL){
         e_.type = G2D_EVENTTYPE_MOUSEWHEEL;
-        e_.mouse.wheel = (Uint8)e.wheel.y;
+        e_.mouse.wheel = e.wheel.y;
     }
     else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
         e_.type = e.type == SDL_KEYDOWN?G2D_EVENTTYPE_KEYDOWN:G2D_EVENTTYPE_KEYUP;
@@ -174,10 +174,10 @@ void G2D_Engine::run() {
     bool quit = false;
     SDL_Event e;
 
-    uint32_t fps_tick = SDL_GetTicks();
-    uint16_t frame = 0;
-    uint32_t main_tick;
-    uint32_t frame_total = 0;
+    int fps_tick = SDL_GetTicks();
+    int frame = 0;
+    int main_tick;
+    int frame_total = 0;
 
     // Main loop
     while (!quit) {

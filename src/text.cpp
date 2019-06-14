@@ -33,7 +33,7 @@ void G2D_Text::setColor(G2D_Color color) {
     reloadTexture();
 }
 
-void G2D_Text::setColor(uint8_t red, uint8_t green, uint8_t blue) {
+void G2D_Text::setColor(int red, int green, int blue) {
     _color.r = red;
     _color.g = green;
     _color.b = blue;
@@ -41,7 +41,7 @@ void G2D_Text::setColor(uint8_t red, uint8_t green, uint8_t blue) {
     reloadTexture();
 }
 
-void G2D_Text::setAlpha(uint8_t alpha) {
+void G2D_Text::setAlpha(int alpha) {
     _color.a = alpha;
     _texture->setAlpha(_color.a);
 }

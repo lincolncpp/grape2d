@@ -45,7 +45,7 @@ int G2D_Music::play(bool looping) {
     return channel;
 }
 
-int G2D_Music::playFadeIn(bool looping, uint32_t effect_time_ms) {
+int G2D_Music::playFadeIn(bool looping, int effect_time_ms) {
     int channel = Mix_FadeInMusic(_music, looping?-1:0, effect_time_ms);
     if (channel == -1){
         printf("Error on playing music. %s\n", Mix_GetError());
@@ -68,7 +68,7 @@ void G2D_Music::setVolume(int volume) {
     if (volume < 0) volume = 0;
     if (volume > 100) volume = 100;
 
-    _volume = (uint8_t)volume;
+    _volume = (int)volume;
 
     updateVolume();
 }
@@ -95,7 +95,7 @@ void G2D_Music::stop() {
     }
 }
 
-void G2D_Music::stopFadeOut(uint32_t effect_time_ms) {
+void G2D_Music::stopFadeOut(int effect_time_ms) {
     if (Mix_PlayingMusic() && G2D_Engine::instance->mixer->_playing_music == this) {
         Mix_FadeOutMusic(effect_time_ms);
     }

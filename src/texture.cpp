@@ -26,14 +26,14 @@ G2D_Texture::G2D_Texture(const char *path) {
     int real_width, real_height;
     SDL_QueryTexture(_texture, nullptr, nullptr, &real_width, &real_height);
 
-    _width = _src_width = (uint16_t)real_width;
-    _height = _src_height = (uint16_t)real_height;
+    _width = _src_width = (int)real_width;
+    _height = _src_height = (int)real_height;
 }
 
 G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
     free();
 
-    SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
+    SDL_Color sdl_color = {(Uint8)color.r, (Uint8)color.g, (Uint8)color.b, (Uint8)color.a};
 
     SDL_Surface *textSurface = TTF_RenderText_Blended(font->_font, text, sdl_color);
     if (textSurface == nullptr){
@@ -47,8 +47,8 @@ G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
 
         }
         else{
-            _src_width = _width = (uint16_t)textSurface->w;
-            _src_height = _height = (uint16_t)textSurface->h;
+            _src_width = _width = textSurface->w;
+            _src_height = _height = textSurface->h;
         }
 
         SDL_FreeSurface(textSurface);
@@ -67,7 +67,7 @@ void G2D_Texture::setColor(G2D_Color color) {
     setAlpha(color.a);
 }
 
-void G2D_Texture::setColor(uint8_t red, uint8_t green, uint8_t blue) {
+void G2D_Texture::setColor(int red, int green, int blue) {
     SDL_SetTextureColorMod(_texture, red, green, blue);
 }
 
@@ -81,7 +81,7 @@ void G2D_Texture::setBlendMode(G2D_BlendMode blendMode) {
     SDL_SetTextureBlendMode(_texture, blend);
 }
 
-void G2D_Texture::setAlpha(uint8_t alpha) {
+void G2D_Texture::setAlpha(int alpha) {
     SDL_SetTextureAlphaMod(_texture, alpha);
 }
 
@@ -132,8 +132,8 @@ void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *
 
 
 void G2D_Texture::setSize(int width, int height) {
-    _width = (uint16_t)width;
-    _height = (uint16_t)height;
+    _width = (int)width;
+    _height = (int)height;
 }
 
 int G2D_Texture::getSrcWidth() {

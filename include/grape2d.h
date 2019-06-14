@@ -306,10 +306,10 @@ enum G2D_Referential{
 
 // G2D Color struct
 struct G2D_Color{
-    uint8_t r = 0;
-    uint8_t g = 0;
-    uint8_t b = 0;
-    uint8_t a = 255;
+    int r = 0;
+    int g = 0;
+    int b = 0;
+    int a = 255;
 };
 
 // G2D Rect struct
@@ -336,7 +336,7 @@ struct G2D_Event{
         int y_rel;
         G2D_MOUSEBUTTON button;
 
-        int8_t wheel;
+        int wheel;
     } mouse = {};
 
     struct G2D_KeyboardEvent{
@@ -372,7 +372,7 @@ private:
         void update();
 
     public:
-        void setChannelVolume(int8_t volume, int channel = -1);
+        void setChannelVolume(int volume, int channel = -1);
         int getChannelVolume(int channel = -1);
 
         void setMaxChannels(int num_channels);
@@ -380,12 +380,12 @@ private:
         void resumeChannel(int channel = -1);
         void pauseChannel(int channel = -1);
         void endChannel(int channel);
-        void endChannelTimed(int channel, uint32_t time_ms);
-        void endChannelFadeOut(int channel, uint32_t time_ms);
+        void endChannelTimed(int channel, int time_ms);
+        void endChannelFadeOut(int channel, int time_ms);
 
-        void setPlanning(int channel, uint8_t left, uint8_t right);
-        void setDistance(int channel, uint8_t distance);
-        void setPosition(int channel, int16_t angle, uint8_t distance);
+        void setPlanning(int channel, int left, int right);
+        void setDistance(int channel, int distance);
+        void setPosition(int channel, int angle, int distance);
         void removeEffects(int channel);
 
         G2D_Music *getThePlayingMusic();
@@ -421,11 +421,11 @@ private:
 
     // Window
     SDL_Window* _window = nullptr;
-    uint16_t _window_width;
-    uint16_t _window_height;
+    int _window_width;
+    int _window_height;
 
     // FPS
-    uint16_t _real_fps = 0;
+    int _real_fps = 0;
 
     // Containers
     std::vector<G2D_Container*> _containers = {};
@@ -447,7 +447,7 @@ public:
     G2D_Mixer *mixer = nullptr;
     G2D_Camera *camera = nullptr;
 
-    G2D_Engine(uint16_t width, uint16_t height, const char *title, bool debug = false, uint32_t SDL_flags = SDL_RENDERER_ACCELERATED);
+    G2D_Engine(int width, int height, const char *title, bool debug = false, int SDL_flags = SDL_RENDERER_ACCELERATED);
     ~G2D_Engine();
 
     bool hasError();
@@ -472,10 +472,10 @@ class G2D_Texture{
 private:
     SDL_Texture *_texture = nullptr;
 
-    uint16_t _src_width;
-    uint16_t _width;
-    uint16_t _src_height;
-    uint16_t _height;
+    int _src_width;
+    int _width;
+    int _src_height;
+    int _height;
 
     G2D_Referential _referential = G2D_REFERENTIAL_ABSOLUTE;
 
@@ -488,9 +488,9 @@ public:
     void free();
 
     void setColor(G2D_Color color);
-    void setColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setColor(int red, int green, int blue);
     void setBlendMode(G2D_BlendMode blendMode);
-    void setAlpha(uint8_t alpha);
+    void setAlpha(int alpha);
 
     void setReferential(G2D_Referential referential);
 
@@ -510,7 +510,7 @@ class G2D_Font{
 private:
     TTF_Font *_font = nullptr;
     std::string _path;
-    uint16_t _size;
+    int _size;
 
     bool loadFont(const char *path, int size);
 
@@ -542,8 +542,8 @@ public:
     ~G2D_Text();
 
     void setColor(G2D_Color color);
-    void setColor(uint8_t red, uint8_t green, uint8_t blue);
-    void setAlpha(uint8_t alpha);
+    void setColor(int red, int green, int blue);
+    void setAlpha(int alpha);
     void setText(const char *text, ...);
     void setFont(G2D_Font *font);
 
@@ -558,7 +558,7 @@ class G2D_Music{
 private:
     Mix_Music *_music = nullptr;
 
-    uint8_t _volume = 100;
+    int _volume = 100;
 
     void updateVolume();
 
@@ -567,14 +567,14 @@ public:
     ~G2D_Music();
 
     int play(bool looping = true);
-    int playFadeIn(bool looping = true, uint32_t effect_time_ms = 1000);
+    int playFadeIn(bool looping = true, int effect_time_ms = 1000);
 
     void rewind();
 
     void resume();
     void pause();
     void stop();
-    void stopFadeOut(uint32_t effect_time_ms = 1000);
+    void stopFadeOut(int effect_time_ms = 1000);
 
     void setVolume(int volume);
     int getVolume();
@@ -600,7 +600,7 @@ public:
     void setChannel(int channel);
     int getChannel();
 
-    int play(int repeat_times = 0, int32_t limit_ms = 0);
+    int play(int repeat_times = 0, int limit_ms = 0);
 
     void setPosition(int x, int y);
     void setPosition(G2D_Point point);
@@ -624,12 +624,12 @@ class G2D_Container{
 private:
     bool _visible = true;
 
-    int16_t _zindex = 0;
+    int _zindex = 0;
 
     std::vector<G2D_Sprite*> _elements = {};
 
     void render();
-    void update(uint32_t frame);
+    void update(int frame);
 
     void updateSpriteZIndex();
 
@@ -653,10 +653,10 @@ public:
 
     G2D_Callback callback = {};
 
-    void setZIndex(int16_t value);
+    void setZIndex(int value);
     int getZIndex();
 
-    void attach(G2D_Sprite *sprite  );
+    void attach(G2D_Sprite *sprite);
 
     void hide();
     void show();
@@ -672,18 +672,18 @@ private:
     G2D_Point _position = {0, 0};
 
     G2D_Rect _clip = {0};
-    uint16_t _current_frame = 0;
+    int _current_frame = 0;
 
-    int16_t _zindex = 0;
+    int _zindex = 0;
 
     // Animate
-    uint32_t _tick_animate = 0;
-    uint32_t _time = 0;
+    int _tick_animate = 0;
+    int _time = 0;
     bool _is_animating = false;
     std::vector<int> *_frames = nullptr;
 
     void construct(int frames_x, int frames_y);
-    void update(uint32_t tick);
+    void update(int tick);
 
 public:
     G2D_Sprite(const char *path, int frames_x = 0, int frames_y = 0);
@@ -702,7 +702,7 @@ public:
     void setFrame(int frame);
     int getFrame();
 
-    void animate(std::vector<int> frames, uint32_t time, bool force = false);
+    void animate(std::vector<int> frames, int time, bool force = false);
 
     void setZIndex(int value);
     int getZIndex();
@@ -717,16 +717,16 @@ private:
     bool _started = false;
     bool _paused = false;
 
-    uint32_t _tick_start = 0;
-    uint32_t _tick_pause = 0;
-    uint32_t _limit = 0;
+    int _tick_start = 0;
+    int _tick_pause = 0;
+    int _limit = 0;
 
     void (*_callback)() = nullptr;
 public:
-    G2D_Timer(uint32_t limit = 0, void (*callback)() = nullptr);
+    G2D_Timer(int limit = 0, void (*callback)() = nullptr);
     ~G2D_Timer();
 
-    void update(uint32_t engine_tick);
+    void update(int engine_tick);
 
     void start();
     void pause();

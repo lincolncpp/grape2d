@@ -21,13 +21,13 @@ void G2D_Container::render() {
     }
 }
 
-void G2D_Container::update(uint32_t tick) {
+void G2D_Container::update(int tick) {
     for (auto sprite: _elements){
         sprite->update(tick);
     }
 }
 
-void G2D_Container::setZIndex(int16_t value) {
+void G2D_Container::setZIndex(int value) {
     _zindex = value;
     G2D_Engine::instance->updateContainerZIndex();
 }

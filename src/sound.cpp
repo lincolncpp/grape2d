@@ -32,7 +32,7 @@ int G2D_Sound::getChannel() {
     return _channel;
 }
 
-int G2D_Sound::play(int repeat_times, int32_t limit_ms) {
+int G2D_Sound::play(int repeat_times, int limit_ms) {
     int channel = Mix_PlayChannelTimed(_channel, _sound, repeat_times, limit_ms);
     if (channel == -1){
         printf("Error on playing sound. %s\n", Mix_GetError());

@@ -32,14 +32,14 @@ void G2D_Sprite::construct(int frames_x, int frames_y) {
     }
 }
 
-void G2D_Sprite::update(uint32_t tick) {
+void G2D_Sprite::update(int tick) {
     if (_is_animating){
         int frame = _tick_animate;
 
         int frame_index = (int)((float)(tick-_tick_animate)/(_time)*((int)_frames->size()));
         frame_index = frame_index > (int)_frames->size()-1?(int)_frames->size()-1:frame_index;
 
-        setFrame(_frames->at((uint16_t)frame_index));
+        setFrame(_frames->at(frame_index));
 
         if (tick > _tick_animate+_time) _is_animating = false;
     }
@@ -104,26 +104,25 @@ void G2D_Sprite::setFrame(int frame) {
     _clip.x = frame_x * _clip.w;
     _clip.y = frame_y * _clip.h;
 
-    _current_frame = (uint16_t)frame;
+    _current_frame = frame;
 }
 
 int G2D_Sprite::getFrame() {
     return _current_frame;
 }
 
-void G2D_Sprite::animate(std::vector<int> frames, uint32_t time, bool force){
+void G2D_Sprite::animate(std::vector<int> frames, int time, bool force){
     if (!_is_animating || (_is_animating && force)){
         _tick_animate = SDL_GetTicks();
         _is_animating = true;
         _time = time;
 
-        _frames = new std::vector<int>;
-        _frames->assign(frames.begin(), frames.end());
+        _frames = new std::vector<int>(frames.begin(), frames.end());
     }
 }
 
 void G2D_Sprite::setZIndex(int value) {
-    _zindex = (int16_t)value;
+    _zindex = (int)value;
     if (_container_owner != nullptr){
         _container_owner->updateSpriteZIndex();
     }
