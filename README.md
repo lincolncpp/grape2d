@@ -27,7 +27,7 @@ To build it, first clone this repository
 ```
 git clone https://github.com/lincolncpp/grape2d
 ```
-Next, use the make command and you are done
+Then, use the make command to build it
 ```
 make
 ```
@@ -46,11 +46,11 @@ make install
 
 ### Running
 
-To run any example code, first use the make command in their respective folder to build it
+To run any example code, first use the make command in the respective folder to build it
 ```
 make
 ```
-And then, run the generated file
+And then, execute the generated file
 
 ## Authors
 - **Fernando Lincoln** - [lincolncpp](https://github.com/lincolncpp)
