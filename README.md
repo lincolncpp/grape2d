@@ -39,8 +39,8 @@ make install
 ```
 
 ## Demos
-- [`texture`](https://github.com/lincolncpp/grape2d/tree/master/test/texture) — Shows a simple texture on the screen
-- [`audio`](https://github.com/lincolncpp/grape2d/tree/master/test/audio) — Plays music and sound with 2D ambient effect
+- [`texture`](https://github.com/lincolncpp/grape2d/tree/master/demos/texture) — Shows a simple texture on the screen
+- [`audio`](https://github.com/lincolncpp/grape2d/tree/master/demos/audio) — Plays music and sound with 2D ambient effect
 
 ### Running
 
