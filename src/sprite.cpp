@@ -35,7 +35,7 @@ void Sprite::construct(int frames_x, int frames_y) {
 
 void Sprite::update(int tick) {
     if (_is_animating){
-        int frame = _tick_animate;
+        // int frame = _tick_animate;
 
         int frame_index = (int)((float)(tick-_tick_animate)/(_time)*((int)_frames->size()));
         frame_index = frame_index > (int)_frames->size()-1?(int)_frames->size()-1:frame_index;
