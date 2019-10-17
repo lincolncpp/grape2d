@@ -7,22 +7,24 @@
 
 #include "../include/grape2d.h"
 
-G2D_Timer::G2D_Timer(int limit, void (*callback)()) {
+using namespace G2D;
+
+Timer::Timer(int limit, void (*callback)()) {
     _limit = limit;
     _callback = callback;
 
     if (_limit > 0){
-        G2D_Engine::instance->_timers.push_back(this);
+        Engine::instance->_timers.push_back(this);
     }
 }
 
-G2D_Timer::~G2D_Timer() {
+Timer::~Timer() {
     if (_limit > 0){
-        G2D_Engine::instance->_timers.erase(find(G2D_Engine::instance->_timers.begin(), G2D_Engine::instance->_timers.end(), this));
+        Engine::instance->_timers.erase(find(Engine::instance->_timers.begin(), Engine::instance->_timers.end(), this));
     }
 }
 
-void G2D_Timer::update(int engine_tick) {
+void Timer::update(int engine_tick) {
     if (!_paused && _started){
         if (engine_tick >= _tick_start + _limit){
             _tick_start += _limit;
@@ -34,7 +36,7 @@ void G2D_Timer::update(int engine_tick) {
     }
 }
 
-void G2D_Timer::start() {
+void Timer::start() {
     if (!_started) {
         _paused = false;
         _started = true;
@@ -42,33 +44,33 @@ void G2D_Timer::start() {
     }
 }
 
-void G2D_Timer::pause() {
+void Timer::pause() {
     if (!_paused && _started) {
         _tick_pause = SDL_GetTicks();
         _paused = true;
     }
 }
 
-void G2D_Timer::resume() {
+void Timer::resume() {
     if (_paused && _started) {
         _tick_start += SDL_GetTicks() - _tick_pause;
         _paused = false;
     }
 }
 
-void G2D_Timer::stop() {
+void Timer::stop() {
     if (_started){
         _started = false;
     }
 }
 
-void G2D_Timer::restart() {
+void Timer::restart() {
     _started = true;
     _paused = false;
     _tick_start = SDL_GetTicks();
 }
 
-void G2D_Timer::toggle() {
+void Timer::toggle() {
     if (_paused){
         resume();
     }
@@ -77,7 +79,7 @@ void G2D_Timer::toggle() {
     }
 }
 
-int G2D_Timer::getTime() {
+int Timer::getTime() {
     if (!_started){
         return 0;
     }
@@ -88,10 +90,10 @@ int G2D_Timer::getTime() {
     return SDL_GetTicks()-_tick_start;
 }
 
-bool G2D_Timer::isPaused() {
+bool Timer::isPaused() {
     return _paused;
 }
 
-bool G2D_Timer::isStarted() {
+bool Timer::isStarted() {
     return _started;
 }

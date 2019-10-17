@@ -7,25 +7,27 @@
 
 #include "../include/grape2d.h"
 
-G2D_Font::G2D_Font(const char *path, int size) {
+using namespace G2D;
+
+Font::Font(const char *path, int size) {
     _path = path;
     _size = size;
 
     loadFont(path, size);
 }
 
-G2D_Font::~G2D_Font() {
+Font::~Font() {
     free();
 }
 
-void G2D_Font::free() {
+void Font::free() {
     if (_font != nullptr){
         TTF_CloseFont(_font);
         _font = nullptr;
     }
 }
 
-bool G2D_Font::loadFont(const char *path, int size) {
+bool Font::loadFont(const char *path, int size) {
     free();
 
     _font = TTF_OpenFont(path, size);
@@ -38,6 +40,6 @@ bool G2D_Font::loadFont(const char *path, int size) {
     return true;
 }
 
-void G2D_Font::setSize(int size) {
+void Font::setSize(int size) {
     loadFont(_path.c_str(), size);
 }

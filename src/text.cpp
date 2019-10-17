@@ -7,7 +7,9 @@
 
 #include "../include/grape2d.h"
 
-G2D_Text::G2D_Text(G2D_Font *font, const char *text, ...) {
+using namespace G2D;
+
+Text::Text(Font *font, const char *text, ...) {
     _font = font;
 
     char *msg = nullptr;
@@ -23,17 +25,17 @@ G2D_Text::G2D_Text(G2D_Font *font, const char *text, ...) {
     delete msg;
 }
 
-G2D_Text::~G2D_Text() {
+Text::~Text() {
     delete _texture;
 }
 
-void G2D_Text::setColor(G2D_Color color) {
+void Text::setColor(Color color) {
     _color = color;
 
     reloadTexture();
 }
 
-void G2D_Text::setColor(int red, int green, int blue) {
+void Text::setColor(int red, int green, int blue) {
     _color.r = red;
     _color.g = green;
     _color.b = blue;
@@ -41,12 +43,12 @@ void G2D_Text::setColor(int red, int green, int blue) {
     reloadTexture();
 }
 
-void G2D_Text::setAlpha(int alpha) {
+void Text::setAlpha(int alpha) {
     _color.a = alpha;
     _texture->setAlpha(_color.a);
 }
 
-void G2D_Text::setText(const char *text, ...) {
+void Text::setText(const char *text, ...) {
 
     char *msg = nullptr;
     va_list args;
@@ -62,28 +64,28 @@ void G2D_Text::setText(const char *text, ...) {
     delete msg;
 }
 
-void G2D_Text::setFont(G2D_Font *font) {
+void Text::setFont(Font *font) {
     _font = font;
 
     reloadTexture();
 }
 
-void G2D_Text::setReferential(G2D_Referential referential) {
+void Text::setReferential(Referential referential) {
     _referential = referential;
 
     _texture->setReferential(_referential);
 }
 
-void G2D_Text::render(int x, int y) {
+void Text::render(int x, int y) {
     _texture->render(x, y);
 }
 
 
-void G2D_Text::reloadTexture() {
+void Text::reloadTexture() {
     if (_texture != nullptr){
         _texture->free();
         delete _texture;
     }
-    _texture = new G2D_Texture(_font, _text.c_str(), _color);
+    _texture = new Texture(_font, _text.c_str(), _color);
     _texture->setReferential(_referential);
 }

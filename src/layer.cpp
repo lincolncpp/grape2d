@@ -7,68 +7,70 @@
 
 #include "../include/grape2d.h"
 
-G2D_Container::G2D_Container() {
+using namespace G2D;
+
+Layer::Layer() {
 
 }
 
-G2D_Container::~G2D_Container() {
+Layer::~Layer() {
 
 }
 
-void G2D_Container::render() {
+void Layer::render() {
     for (auto sprite : _elements){
         sprite->render();
     }
 }
 
-void G2D_Container::update(int tick) {
+void Layer::update(int tick) {
     for (auto sprite: _elements){
         sprite->update(tick);
     }
 }
 
-void G2D_Container::setZIndex(int value) {
+void Layer::setZIndex(int value) {
     _zindex = value;
-    G2D_Engine::instance->updateContainerZIndex();
+    Engine::instance->updateLayerZIndex();
 }
 
-int G2D_Container::getZIndex() {
+int Layer::getZIndex() {
     return _zindex;
 }
 
-void G2D_Container::hide() {
+void Layer::hide() {
     _visible = false;
 }
 
-void G2D_Container::show() {
+void Layer::show() {
     _visible = true;
 }
 
-void G2D_Container::G2D_Callback::onEvent(void (*function)(G2D_Event)) {
+void Layer::Callback::onEvent(void (*function)(Event)) {
     onEventFunction = function;
 }
 
-void G2D_Container::G2D_Callback::onUpdate(void (*function)()) {
+void Layer::Callback::onUpdate(void (*function)()) {
     onUpdateFunction = function;
 }
 
 
-void G2D_Container::G2D_Callback::onRender(void (*function)()) {
+void Layer::Callback::onRender(void (*function)()) {
     onRenderFunction = function;
 }
 
-void G2D_Container::attach(G2D_Sprite *sprite) {
-    if (sprite->_container_owner == nullptr) {
+void Layer::attach(Sprite *sprite) {
+    if (sprite->_layer_owner == nullptr) {
         if (_elements.empty() || find(_elements.begin(), _elements.end(), sprite) == _elements.end()) {
-            sprite->_container_owner = this;
+            sprite->_layer_owner = this;
             _elements.push_back(sprite);
             updateSpriteZIndex();
         }
     }
 }
 
-void G2D_Container::updateSpriteZIndex() {
-    auto compare = [](const G2D_Sprite *a, const G2D_Sprite *b) -> bool{
+void Layer::updateSpriteZIndex() {
+    auto compare = [](const Sprite *a, const Sprite *b) -> bool{
         return a->_zindex < b->_zindex;
     };
     sort(_elements.begin(), _elements.end(), compare);

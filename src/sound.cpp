@@ -11,7 +11,9 @@
 
 #include "../include/grape2d.h"
 
-G2D_Sound::G2D_Sound(const char *path) {
+using namespace G2D;
+
+Sound::Sound(const char *path) {
     _sound = Mix_LoadWAV(path);
 
     if (_sound == nullptr){
@@ -20,65 +22,65 @@ G2D_Sound::G2D_Sound(const char *path) {
     }
 }
 
-G2D_Sound::~G2D_Sound() {
+Sound::~Sound() {
     free();
 }
 
-void G2D_Sound::setChannel(int channel) {
+void Sound::setChannel(int channel) {
     _channel = channel;
 }
 
-int G2D_Sound::getChannel() {
+int Sound::getChannel() {
     return _channel;
 }
 
-int G2D_Sound::play(int repeat_times, int limit_ms) {
+int Sound::play(int repeat_times, int limit_ms) {
     int channel = Mix_PlayChannelTimed(_channel, _sound, repeat_times, limit_ms);
     if (channel == -1){
         printf("Error on playing sound. %s\n", Mix_GetError());
     }
-    G2D_Engine::instance->mixer->add(this, channel);
+    Engine::instance->mixer->add(this, channel);
 
     return channel;
 }
 
-void G2D_Sound::setPosition(int x, int y) {
+void Sound::setPosition(int x, int y) {
     _position.x = x;
     _position.y = y;
 
     _2d_effect = true;
 }
 
-void G2D_Sound::setPosition(G2D_Point point) {
+void Sound::setPosition(Point point) {
     _position = point;
     _2d_effect = true;
 }
 
-void G2D_Sound::setX(int x) {
+void Sound::setX(int x) {
     _position.x = x;
 
     _2d_effect = true;
 }
 
-void G2D_Sound::setY(int y) {
+void Sound::setY(int y) {
     _position.y = y;
 
     _2d_effect = true;
 }
 
-int G2D_Sound::getX() {
+int Sound::getX() {
     return _position.x;
 }
 
-int G2D_Sound::getY() {
+int Sound::getY() {
     return _position.y;
 }
 
-void G2D_Sound::disable2DEffect() {
+void Sound::disable2DEffect() {
     _2d_effect = false;
 }
 
-void G2D_Sound::setVolume(int volume){
+void Sound::setVolume(int volume){
     if (volume < 0) volume = 0;
     if (volume > 100) volume = 100;
 
@@ -87,13 +89,13 @@ void G2D_Sound::setVolume(int volume){
     Mix_VolumeChunk(_sound, v);
 }
 
-int G2D_Sound::getVolume() {
+int Sound::getVolume() {
     int v = (int)round(((float)Mix_VolumeChunk(_sound, -1)/(float)MIX_MAX_VOLUME)*100);
 
     return v;
 }
 
-void G2D_Sound::free() {
+void Sound::free() {
     if (_sound != nullptr){
         Mix_FreeChunk(_sound);
         delete _sound;

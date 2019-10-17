@@ -9,11 +9,12 @@
 
 #include "../include/grape2d.h"
 
-G2D_Engine *G2D_Engine::instance = nullptr;
+using namespace G2D;
 
-G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, int SDL_flags) {
+Engine *Engine::instance = nullptr;
+
+Engine::Engine(int width, int height, const char *title, bool debug, int SDL_flags) {
     _debug = debug;
-
 
     // Initialize SDL
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -51,16 +52,16 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, int
                     }
                     else{
                         //Initialize SDL_mixer
-                        if (Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) {
+                        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) {
                             setError("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
                         }
                         else{
-                            G2D_Engine::instance = this;
+                            Engine::instance = this;
 
-                            mixer = new G2D_Mixer();
+                            mixer = new Mixer();
                             Mix_AllocateChannels(100);
 
-                            camera = new G2D_Camera();
+                            camera = new Camera();
                         }
                     }
                 }
@@ -69,7 +70,7 @@ G2D_Engine::G2D_Engine(int width, int height, const char *title, bool debug, int
     }
 }
 
-G2D_Engine::~G2D_Engine() {
+Engine::~Engine() {
     SDL_DestroyWindow(_window);
     SDL_DestroyRenderer(_renderer);
 
@@ -85,15 +86,15 @@ G2D_Engine::~G2D_Engine() {
     Mix_Quit();
 }
 
-bool G2D_Engine::hasError() {
+bool Engine::hasError() {
     return _has_error;
 }
 
-const char* G2D_Engine::getError() {
+const char* Engine::getError() {
     return _error.c_str();
 }
 
-void G2D_Engine::setError(const char *text, ...) {
+void Engine::setError(const char *text, ...) {
     char *msg = nullptr;
 
     va_list args;
@@ -111,64 +112,64 @@ void G2D_Engine::setError(const char *text, ...) {
     }
 }
 
-int G2D_Engine::getWindowWidth() {
+int Engine::getWindowWidth() {
     return _window_width;
 }
 
-int G2D_Engine::getWindowHeight() {
+int Engine::getWindowHeight() {
     return _window_height;
 }
 
-int G2D_Engine::getFPS() {
+int Engine::getFPS() {
     return _real_fps;
 }
 
-G2D_Event G2D_Engine::convertEvent(SDL_Event e) {
-    G2D_Event e_ = {};
+Event Engine::convertEvent(SDL_Event e) {
+    Event e_ = {};
 
     SDL_GetMouseState(&e_.mouse.x, &e_.mouse.y);
-    e_.mouse.x_rel = e_.mouse.x+G2D_Engine::instance->camera->getCornerX();
-    e_.mouse.y_rel = e_.mouse.y+G2D_Engine::instance->camera->getCornerY();
+    e_.mouse.x_rel = e_.mouse.x+Engine::instance->camera->getCornerX();
+    e_.mouse.y_rel = e_.mouse.y+Engine::instance->camera->getCornerY();
 
     if (e.type == SDL_MOUSEMOTION){
-        e_.type = G2D_EVENTTYPE_MOUSEMOVE;
+        e_.type = ET_MOUSEMOVE;
     }
     else if (e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP){
-        e_.type = (e.type == SDL_MOUSEBUTTONDOWN)?G2D_EVENTTYPE_MOUSEDOWN:G2D_EVENTTYPE_MOUSEUP;
+        e_.type = (e.type == SDL_MOUSEBUTTONDOWN)?ET_MOUSEDOWN:ET_MOUSEUP;
 
-        if (e.button.button == SDL_BUTTON_LEFT) e_.mouse.button = G2D_MOUSEBUTTON_LEFT;
-        else if (e.button.button == SDL_BUTTON_MIDDLE) e_.mouse.button = G2D_MOUSEBUTTON_MIDDLE;
-        else if (e.button.button == SDL_BUTTON_RIGHT) e_.mouse.button = G2D_MOUSEBUTTON_RIGHT;
+        if (e.button.button == SDL_BUTTON_LEFT) e_.mouse.button = MB_LEFT;
+        else if (e.button.button == SDL_BUTTON_MIDDLE) e_.mouse.button = MB_MIDDLE;
+        else if (e.button.button == SDL_BUTTON_RIGHT) e_.mouse.button = MB_RIGHT;
     }
     else if (e.type == SDL_MOUSEWHEEL){
-        e_.type = G2D_EVENTTYPE_MOUSEWHEEL;
+        e_.type = ET_MOUSEWHEEL;
         e_.mouse.wheel = e.wheel.y;
     }
     else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
-        e_.type = e.type == SDL_KEYDOWN?G2D_EVENTTYPE_KEYDOWN:G2D_EVENTTYPE_KEYUP;
+        e_.type = e.type == SDL_KEYDOWN?ET_KEYDOWN:ET_KEYUP;
 
-        e_.key.keycode = (G2D_Keycode)e.key.keysym.sym;
+        e_.keyboard.key= (Keycode)e.key.keysym.sym;
     }
 
     return e_;
 }
 
-void G2D_Engine::attachContainer(G2D_Container *container) {
-    if (_containers.empty() || find(_containers.begin(), _containers.end(), container) == _containers.end()) {
-        _containers.push_back(container);
-        updateContainerZIndex();
+void Engine::attachLayer(Layer *layer) {
+    if (_layers.empty() || find(_layers.begin(), _layers.end(), layer) == _layers.end()) {
+        _layers.push_back(layer);
+        updateLayerZIndex();
     }
 }
 
 
-void G2D_Engine::updateContainerZIndex() {
-    auto compare = [](const G2D_Container *a, const G2D_Container *b) -> bool{
+void Engine::updateLayerZIndex() {
+    auto compare = [](const Layer *a, const Layer *b) -> bool{
         return a->_zindex < b->_zindex;
     };
-    sort(_containers.begin(), _containers.end(), compare);
+    sort(_layers.begin(), _layers.end(), compare);
 }
 
-void G2D_Engine::run() {
+void Engine::run() {
     if (_has_error) return;
 
     bool quit = false;
@@ -196,33 +197,33 @@ void G2D_Engine::run() {
                 quit = true;
             }
 
-            for (auto container : _containers){
-                if (container->callback.onEventFunction != nullptr){
-                    container->callback.onEventFunction(convertEvent(e));
+            for (auto layer : _layers){
+                if (layer->callback.onEventFunction != nullptr){
+                    layer->callback.onEventFunction(convertEvent(e));
                 }
             }
         }
 
 
         // Logic game loop
-        for (auto container : _containers){
-            if (container->_visible){
-                if (container->callback.onUpdateFunction != nullptr){
-                    container->callback.onUpdateFunction();
+        for (auto layer : _layers){
+            if (layer->_visible){
+                if (layer->callback.onUpdateFunction != nullptr){
+                    layer->callback.onUpdateFunction();
                 }
-                container->update(main_tick);
+                layer->update(main_tick);
             }
         }
 
 
         // Render
         SDL_RenderClear(_renderer);
-        for (auto container : _containers){
-            if (container->_visible) {
-                if (container->callback.onRenderFunction != nullptr){
-                    container->callback.onRenderFunction();
+        for (auto layer : _layers){
+            if (layer->_visible) {
+                if (layer->callback.onRenderFunction != nullptr){
+                    layer->callback.onRenderFunction();
                 }
-                container->render(); // memory problem here
+                layer->render(); // memory problem here
             }
         }
         SDL_RenderPresent(_renderer);

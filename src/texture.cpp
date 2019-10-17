@@ -7,15 +7,17 @@
 
 #include "../include/grape2d.h"
 
-G2D_Texture::~G2D_Texture() {
+using namespace G2D;
+
+Texture::~Texture() {
     free();
 }
 
-G2D_Texture::G2D_Texture(const char *path) {
+Texture::Texture(const char *path) {
     free();
 
     // Loading from file
-    _texture = IMG_LoadTexture(G2D_Engine::instance->_renderer, path);
+    _texture = IMG_LoadTexture(Engine::instance->_renderer, path);
 
     if (_texture == nullptr){
         printf("Error on loading texture. %s\n", IMG_GetError());
@@ -30,7 +32,7 @@ G2D_Texture::G2D_Texture(const char *path) {
     _height = _src_height = (int)real_height;
 }
 
-G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
+Texture::Texture(Font *font, const char *text, Color color) {
     free();
 
     SDL_Color sdl_color = {(Uint8)color.r, (Uint8)color.g, (Uint8)color.b, (Uint8)color.a};
@@ -40,7 +42,7 @@ G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
         printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
     }
     else{
-        _texture = SDL_CreateTextureFromSurface(G2D_Engine::instance->_renderer, textSurface);
+        _texture = SDL_CreateTextureFromSurface(Engine::instance->_renderer, textSurface);
 
         if (_texture == nullptr){
             printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
@@ -55,49 +57,49 @@ G2D_Texture::G2D_Texture(G2D_Font *font, const char *text, G2D_Color color) {
     }
 }
 
-void G2D_Texture::free() {
+void Texture::free() {
     if (_texture != nullptr){
         SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
 }
 
-void G2D_Texture::setColor(G2D_Color color) {
+void Texture::setColor(Color color) {
     SDL_SetTextureColorMod(_texture, color.r, color.g, color.b);
     setAlpha(color.a);
 }
 
-void G2D_Texture::setColor(int red, int green, int blue) {
+void Texture::setColor(int red, int green, int blue) {
     SDL_SetTextureColorMod(_texture, red, green, blue);
 }
 
-void G2D_Texture::setBlendMode(G2D_BlendMode blendMode) {
+void Texture::setBlendMode(BlendMode blendMode) {
     SDL_BlendMode blend;
-    if (blendMode == G2D_BLENDMODE_NONE)        blend = SDL_BLENDMODE_NONE;
-    else if (blendMode == G2D_BLENDMODE_BLEND)  blend = SDL_BLENDMODE_BLEND;
-    else if (blendMode == G2D_BLENDMODE_ADD)    blend = SDL_BLENDMODE_ADD;
+    if (blendMode == BM_NONE)        blend = SDL_BLENDMODE_NONE;
+    else if (blendMode == BM_BLEND)  blend = SDL_BLENDMODE_BLEND;
+    else if (blendMode == BM_ADD)    blend = SDL_BLENDMODE_ADD;
     else                                        blend = SDL_BLENDMODE_MOD;
 
     SDL_SetTextureBlendMode(_texture, blend);
 }
 
-void G2D_Texture::setAlpha(int alpha) {
+void Texture::setAlpha(int alpha) {
     SDL_SetTextureAlphaMod(_texture, alpha);
 }
 
-void G2D_Texture::setReferential(G2D_Referential referential) {
+void Texture::setReferential(Referential referential) {
     _referential = referential;
 }
 
-void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *center, bool flip_horizontal, bool flip_vertical) {
+void Texture::render(int x, int y, Rect *clip, double angle, Point *center, bool flip_horizontal, bool flip_vertical) {
     SDL_Rect rect = {x, y, _width, _height};
     SDL_Rect clip2 = {0, 0, _width, _height};
     SDL_Point center2 = {0, 0};
     SDL_RendererFlip flip = SDL_FLIP_NONE;
 
-    if (_referential == G2D_REFERENTIAL_RELATIVE){
-        rect.x = x-G2D_Engine::instance->camera->getCornerX();
-        rect.y = y-G2D_Engine::instance->camera->getCornerY();
+    if (_referential == R_RELATIVE){
+        rect.x = x-Engine::instance->camera->getCornerX();
+        rect.y = y-Engine::instance->camera->getCornerY();
     }
 
     if (clip != nullptr){
@@ -127,27 +129,27 @@ void G2D_Texture::render(int x, int y, G2D_Rect *clip, double angle, G2D_Point *
         flip = SDL_FLIP_VERTICAL;
     }
 
-    SDL_RenderCopyEx(G2D_Engine::instance->_renderer, _texture, &clip2, &rect, angle, &center2, flip);
+    SDL_RenderCopyEx(Engine::instance->_renderer, _texture, &clip2, &rect, angle, &center2, flip);
 }
 
 
-void G2D_Texture::setSize(int width, int height) {
+void Texture::setSize(int width, int height) {
     _width = (int)width;
     _height = (int)height;
 }
 
-int G2D_Texture::getSrcWidth() {
+int Texture::getSrcWidth() {
     return _src_width;
 }
 
-int G2D_Texture::getWidth() {
+int Texture::getWidth() {
     return _width;
 }
 
-int G2D_Texture::getSrcHeight() {
+int Texture::getSrcHeight() {
     return _src_height;
 }
 
-int G2D_Texture::getHeight() {
+int Texture::getHeight() {
     return _height;
 }

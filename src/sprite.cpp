@@ -8,21 +8,22 @@
 
 #include "../include/grape2d.h"
 
+using namespace G2D;
 
-G2D_Sprite::G2D_Sprite(const char *path, int frames_x, int frames_y) {
-    _texture = new G2D_Texture(path);
+Sprite::Sprite(const char *path, int frames_x, int frames_y) {
+    _texture = new Texture(path);
 
     construct(frames_x, frames_y);
 }
 
-G2D_Sprite::G2D_Sprite(G2D_Texture *texture, int frames_x, int frames_y) {
+Sprite::Sprite(Texture *texture, int frames_x, int frames_y) {
     _texture = texture;
 
     construct(frames_x, frames_y);
 }
 
-void G2D_Sprite::construct(int frames_x, int frames_y) {
-    _texture->setReferential(G2D_REFERENTIAL_RELATIVE);
+void Sprite::construct(int frames_x, int frames_y) {
+    _texture->setReferential(R_RELATIVE);
 
     if (frames_x > 0 && frames_y > 0){
         _clip = {0, 0, _texture->getSrcWidth()/frames_x, _texture->getSrcHeight()/frames_y};
@@ -32,7 +33,7 @@ void G2D_Sprite::construct(int frames_x, int frames_y) {
     }
 }
 
-void G2D_Sprite::update(int tick) {
+void Sprite::update(int tick) {
     if (_is_animating){
         int frame = _tick_animate;
 
@@ -45,54 +46,54 @@ void G2D_Sprite::update(int tick) {
     }
 }
 
-G2D_Sprite::~G2D_Sprite() {
+Sprite::~Sprite() {
     if (_texture != nullptr){
         _texture->free();
         delete _texture;
     }
 
-    _container_owner = nullptr;
+    _layer_owner = nullptr;
 
 }
 
-G2D_Texture *G2D_Sprite::getTexture() {
+Texture *Sprite::getTexture() {
     return _texture;
 }
 
-void G2D_Sprite::setPosition(int x, int y) {
+void Sprite::setPosition(int x, int y) {
     _position.x = x;
     _position.y = y;
 }
 
-void G2D_Sprite::setPosition(G2D_Point point) {
+void Sprite::setPosition(Point point) {
     _position = point;
 }
 
-void G2D_Sprite::setX(int x) {
+void Sprite::setX(int x) {
     _position.x = x;
 }
 
-int G2D_Sprite::getX() {
+int Sprite::getX() {
     return _position.x;
 }
 
-void G2D_Sprite::setY(int y) {
+void Sprite::setY(int y) {
     _position.y = y;
 }
 
-int G2D_Sprite::getY() {
+int Sprite::getY() {
     return _position.y;
 }
 
-void G2D_Sprite::setReferential(G2D_Referential referential) {
+void Sprite::setReferential(Referential referential) {
     _texture->setReferential(referential);
 }
 
-void G2D_Sprite::render() {
+void Sprite::render() {
     _texture->render(_position.x, _position.y, &_clip);
 }
 
-void G2D_Sprite::setFrame(int frame) {
+void Sprite::setFrame(int frame) {
     int max_frames_w = _texture->_src_width / _clip.w;
     int max_frames_h = _texture->_src_height / _clip.h;
 
@@ -107,11 +108,11 @@ void G2D_Sprite::setFrame(int frame) {
     _current_frame = frame;
 }
 
-int G2D_Sprite::getFrame() {
+int Sprite::getFrame() {
     return _current_frame;
 }
 
-void G2D_Sprite::animate(std::vector<int> frames, int time, bool force){
+void Sprite::animate(std::vector<int> frames, int time, bool force){
     if (!_is_animating || (_is_animating && force)){
         _tick_animate = SDL_GetTicks();
         _is_animating = true;
@@ -121,13 +122,13 @@ void G2D_Sprite::animate(std::vector<int> frames, int time, bool force){
     }
 }
 
-void G2D_Sprite::setZIndex(int value) {
+void Sprite::setZIndex(int value) {
     _zindex = (int)value;
-    if (_container_owner != nullptr){
-        _container_owner->updateSpriteZIndex();
+    if (_layer_owner != nullptr){
+        _layer_owner->updateSpriteZIndex();
     }
 }
 
-int G2D_Sprite::getZIndex() {
+int Sprite::getZIndex() {
     return _zindex;
 }
