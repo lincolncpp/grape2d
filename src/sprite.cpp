@@ -35,7 +35,7 @@ void Sprite::construct(int frames_x, int frames_y) {
 
 void Sprite::update(int tick) {
     if (_is_animating){
-        // int frame = _tick_animate;
+//        int frame = _tick_animate;
 
         int frame_index = (int)((float)(tick-_tick_animate)/(_time)*((int)_frames->size()));
         frame_index = frame_index > (int)_frames->size()-1?(int)_frames->size()-1:frame_index;
@@ -51,8 +51,6 @@ Sprite::~Sprite() {
         _texture->free();
         delete _texture;
     }
-
-    _layer_owner = nullptr;
 
 }
 
@@ -122,13 +120,10 @@ void Sprite::animate(std::vector<int> frames, int time, bool force){
     }
 }
 
-void Sprite::setZIndex(int value) {
-    _zindex = (int)value;
-    if (_layer_owner != nullptr){
-        _layer_owner->updateSpriteZIndex();
-    }
+void Sprite::setZ(int value) {
+    _z = value;
 }
 
-int Sprite::getZIndex() {
-    return _zindex;
+int Sprite::getZ() {
+    return _z;
 }

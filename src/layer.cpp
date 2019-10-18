@@ -18,24 +18,40 @@ Layer::~Layer() {
 }
 
 void Layer::render() {
-    for (auto sprite : _elements){
+    for (auto p : _elements){
+        Sprite *sprite = p.second;
+
         sprite->render();
     }
 }
 
 void Layer::update(int tick) {
-    for (auto sprite: _elements){
+    std::vector<std::pair<int, Sprite*>>refresh;
+
+    for(auto it : _elements){
+        int z = it.first;
+        Sprite *sprite = it.second;
+
         sprite->update(tick);
+
+        if (sprite->_z != z) refresh.push_back(it);
+    }
+
+    if ((int)refresh.size() > 0){
+        for(auto r:refresh){
+            _elements.erase(r);
+            _elements.insert({r.second->_z, r.second});
+        }
     }
 }
 
-void Layer::setZIndex(int value) {
-    _zindex = value;
+void Layer::setZ(int value) {
+    _z = value;
     Engine::instance->updateLayerZIndex();
 }
 
-int Layer::getZIndex() {
-    return _zindex;
+int Layer::getZ() {
+    return _z;
 }
 
 void Layer::hide() {
@@ -54,24 +70,10 @@ void Layer::Callback::onUpdate(void (*function)()) {
     onUpdateFunction = function;
 }
 
-
 void Layer::Callback::onRender(void (*function)()) {
     onRenderFunction = function;
 }
 
 void Layer::attach(Sprite *sprite) {
-    if (sprite->_layer_owner == nullptr) {
-        if (_elements.empty() || find(_elements.begin(), _elements.end(), sprite) == _elements.end()) {
-            sprite->_layer_owner = this;
-            _elements.push_back(sprite);
-            updateSpriteZIndex();
-        }
-    }
-}
-
-void Layer::updateSpriteZIndex() {
-    auto compare = [](const Sprite *a, const Sprite *b) -> bool{
-        return a->_zindex < b->_zindex;
-    };
-    sort(_elements.begin(), _elements.end(), compare);
+    _elements.insert({sprite->_z, sprite});
 }

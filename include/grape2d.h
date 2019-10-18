@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 // Windows support to args
 #ifdef _WIN32
@@ -603,13 +604,12 @@ namespace G2D {
 
     private:
         bool _visible = true;
-        int _zindex = 0;
+        int _z = 0;
 
-        std::vector<Sprite*> _elements = {};
+        std::set<std::pair<int, Sprite*>> _elements = {};
 
         void render();
         void update(int frame);
-        void updateSpriteZIndex();
 
         struct Callback {
             friend class Engine;
@@ -631,8 +631,8 @@ namespace G2D {
 
         Callback callback = {};
 
-        void setZIndex(int value);
-        int getZIndex();
+        void setZ(int value);
+        int getZ();
         void attach(Sprite *sprite);
         void hide();
         void show();
@@ -643,14 +643,12 @@ namespace G2D {
 
     private:
         Texture *_texture = nullptr;
-        Layer *_layer_owner = nullptr;
 
         Point _position = {};
+        int _z = 0;
 
         Rect _clip = {};
         int _current_frame = 0;
-
-        int _zindex = 0;
 
         // Animate
         int _tick_animate = 0;
@@ -676,8 +674,8 @@ namespace G2D {
         void setFrame(int frame);
         int getFrame();
         void animate(std::vector<int> frames, int time, bool force = false);
-        void setZIndex(int value);
-        int getZIndex();
+        void setZ(int value);
+        int getZ();
         void render();
         Texture *getTexture();
     };

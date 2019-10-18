@@ -164,7 +164,7 @@ void Engine::attachLayer(Layer *layer) {
 
 void Engine::updateLayerZIndex() {
     auto compare = [](const Layer *a, const Layer *b) -> bool{
-        return a->_zindex < b->_zindex;
+        return a->_z < b->_z;
     };
     sort(_layers.begin(), _layers.end(), compare);
 }
