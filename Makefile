@@ -17,7 +17,7 @@ SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, build/%.o, $(SRC))
 
 define proc
-	@printf "Grape2D$(1)\n"
+	@printf "[Grape2D] $(1)\n"
 endef
 
 # Targets
