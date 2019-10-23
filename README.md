@@ -7,18 +7,23 @@
 [![license](https://img.shields.io/github/license/lincolncpp/grape2d.svg)](https://github.com/lincolncpp/grape2d/blob/master/LICENSE)
 ===
 
-Grape2D is an open-source 2D game engine with focus in performance and simplicity written in C++. It supports Linux and Windows and interacts with hardware using [SDL](https://www.libsdl.org/)
+Grape2D is an open-source 2D game engine focused on performance and simplicity written in C++. It supports Linux and Windows and interacts with hardware using [SDL](https://www.libsdl.org/)
 
 ## Getting started
-If you want to compile it in Windows, you will need to install [MingW](http://www.mingw.org/).
-The instructions below works both on Windows and Linux.
+If you want to compile it on Windows, you will need to install [MingW](http://www.mingw.org/).
+The instructions below works on both Windows and Linux.
 
 ### Prerequisites
-First of all, you must to install the following libraries
+First of all, you must install the following libraries:
 - SDL2
 - SDL2_ttf
 - SDL2_image
 - SDL2_mixer
+
+You will get all of them by just typing
+```
+sudo apt install libsdl2-*
+```
 
 ### Building from source
 To build it, first clone this repository
@@ -40,11 +45,11 @@ make install
 
 ## Demos
 - [`texture`](https://github.com/lincolncpp/grape2d/tree/master/demos/texture) — Shows a simple texture on the screen
-- [`audio`](https://github.com/lincolncpp/grape2d/tree/master/demos/audio) — Plays music and sound with 2D ambient effect
+- [`audio`](https://github.com/lincolncpp/grape2d/tree/master/demos/audio) — Plays music and sound with a 2D ambient effect
 
 ### Running
 
-To run any example code, first use the make command in the respective folder to build it
+To run any example code, first use the make command in the respective folder in order to build it
 ```
 make
 ```
