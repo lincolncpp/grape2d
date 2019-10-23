@@ -17,7 +17,7 @@ SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, build/%.o, $(SRC))
 
 define proc
-	@printf "[\x1b[1;33mGrape2D\033[0m]\x1b[1;37m $(1)\033[0m\n"
+	@printf "Grape2D$(1)\n"
 endef
 
 # Targets
@@ -48,8 +48,8 @@ install:
 	@cp build/$(LIBNAME) $(PREFIX)/lib/
 	$(call proc,Grape2D has been installed!)
 ifeq ($(PLATFORM),MingW)
-	$(call proc,Include path: \x1b[1;32m$(PREFIX)\include)
-	$(call proc,Library path: \x1b[1;32m$(PREFIX)\lib)
+	$(call proc,Include path: $(PREFIX)\include)
+	$(call proc,Library path: $(PREFIX)\lib)
 endif
 
 uninstall:
